@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <%- include('../partials/head', { seo: seo || {}, settings: settings, isAdmin: false }) %>
+</head>
+<body class="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+
+  <%- include('../partials/navbar', { settings: settings, currentPath: currentPath || '' }) %>
+
+  <main id="main-content">
+
+    <%# ── Page Header ────────────────────────────────────────────────────────── %>
+    <section class="bg-zinc-950 py-16 sm:py-20" aria-label="Page header">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-3xl font-bold text-white sm:text-4xl">Portfolio</h1>
+          <p class="mt-3 text-zinc-400">Proyek-proyek yang telah saya kerjakan</p>
+        </div>
+      </div>
+    </section>
+
+    <%# ── Category Filter ────────────────────────────────────────────────────── %>
+    <%
+      // Build unique category list from portfolios
+      const allCategories = [];
+      if (portfolios && portfolios.length > 0) {
+        portfolios.forEach(function(p) {
+          if (p.category && !allCategories.includes(p.category)) {
+            allCategories.push(p.category);
+          }
+        });
+      }
+    %>
+    <% if (allCategories.length > 1) { %>
+    <section class="border-b border-zinc-200 bg-white py-4 dark:border-zinc-800 dark:bg-zinc-950" aria-label="Filter kategori">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <nav class="flex flex-wrap items-center gap-2" aria-label="Filter portfolio berdasarkan kategori">
+          <a
+            href="/portfolio"
+            class="rounded-full px-4 py-2 text-sm font-medium transition-colors
+              <%= !activeCategory ? 'bg-cyan-500 text-white' : 'border border-zinc-300 text-zinc-600 hover:border-cyan-500 hover:text-cyan-500 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-cyan-400 dark:hover:text-cyan-400' %>"
+            <% if (!activeCategory) { %>aria-current="true"<% } %>
+          >
+            Semua
+          </a>
+          <% allCategories.forEach(function(cat) { %>
+          <a
+            href="/portfolio?category=<%= encodeURIComponent(cat) %>"
+            class="rounded-full px-4 py-2 text-sm font-medium transition-colors
+              <%= activeCategory === cat ? 'bg-cyan-500 text-white' : 'border border-zinc-300 text-zinc-600 hover:border-cyan-500 hover:text-cyan-500 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-cyan-400 dark:hover:text-cyan-400' %>"
+            <% if (activeCategory === cat) { %>aria-current="true"<% } %>
+          >
+            <%= cat %>
+          </a>
+          <% }); %>
+        </nav>
+      </div>
+    </section>
+    <% } %>
+
+    <%# ── Portfolio Grid ──────────────────────────────────────────────────────── %>
+    <section class="py-16 sm:py-20" aria-labelledby="portfolio-grid-heading">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        <% if (activeCategory) { %>
+        <h2 id="portfolio-grid-heading" class="sr-only">Portfolio kategori: <%= activeCategory %></h2>
+        <% } else { %>
+        <h2 id="portfolio-grid-heading" class="sr-only">Semua portfolio</h2>
+        <% } %>
+
+        <% if (portfolios && portfolios.length > 0) { %>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <% portfolios.forEach(function(item) { %>
+          <article class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <% if (item.image) { %>
+            <a href="/portfolio/<%= item.slug %>" class="block overflow-hidden" tabindex="-1" aria-hidden="true">
+              <img
+                src="<%= item.image %>"
+                alt="<%= item.title %>"
+                loading="lazy"
+                class="h-52 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </a>
+            <% } %>
+            <div class="p-5">
+              <% if (item.category) { %>
+              <span class="mb-2 inline-block rounded-full bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400">
+                <%= item.category %>
+              </span>
+              <% } %>
+              <h3 class="mb-2 text-lg font-semibold text-zinc-900 dark:text-white">
+                <a href="/portfolio/<%= item.slug %>" class="transition-colors hover:text-cyan-500 dark:hover:text-cyan-400">
+                  <%= item.title %>
+                </a>
+              </h3>
+              <% if (item.short_description) { %>
+              <p class="mb-4 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+                <%= item.short_description %>
+              </p>
+              <% } %>
+              <% if (item.tech_stack) { %>
+              <div class="mb-4 flex flex-wrap gap-1" aria-label="Tech stack">
+                <%
+                  let techItems = [];
+                  try {
+                    techItems = JSON.parse(item.tech_stack);
+                  } catch(e) {
+                    techItems = item.tech_stack.split(',').map(function(t) { return t.trim(); });
+                  }
+                %>
+                <% techItems.slice(0, 4).forEach(function(tech) { %>
+                <span class="rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                  <%= tech %>
+                </span>
+                <% }); %>
+                <% if (techItems.length > 4) { %>
+                <span class="rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500">
+                  +<%= techItems.length - 4 %> lagi
+                </span>
+                <% } %>
+              </div>
+              <% } %>
+              <a
+                href="/portfolio/<%= item.slug %>"
+                class="inline-flex items-center gap-1 text-sm font-medium text-cyan-500 transition-colors hover:text-cyan-600 dark:text-cyan-400 dark:hover:text-cyan-300"
+                aria-label="Lihat detail proyek <%= item.title %>"
+              >
+                Lihat Detail
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </article>
+          <% }); %>
+        </div>
+        <% } else { %>
+        <div class="py-20 text-center">
+          <p class="text-zinc-500 dark:text-zinc-400">
+            <% if (activeCategory) { %>
+            Tidak ada portfolio dalam kategori "<%= activeCategory %>".
+            <a href="/portfolio" class="text-cyan-500 hover:underline">Lihat semua portfolio</a>
+            <% } else { %>
+            Belum ada portfolio yang dipublikasikan.
+            <% } %>
+          </p>
+        </div>
+        <% } %>
+
+      </div>
+    </section>
+
+  </main>
+
+  <%- include('../partials/footer', { settings: settings, socialLinks: [] }) %>
+  <%- include('../partials/scripts') %>
+</body>
+</html>

@@ -10,49 +10,18 @@
 const express = require('express');
 const router = express.Router();
 
-// TODO: Import publicController when implemented (Task 16.1)
-// const publicController = require('../controllers/publicController');
+const publicController = require('../controllers/publicController');
+const { contactLimiter } = require('../middlewares/rateLimiter');
 
-// Placeholder routes — will be replaced with real controller handlers in Task 16.1
-router.get('/', (req, res) => {
-  res.render('pages/index', { settings: res.locals.settings || {} });
-});
-
-router.get('/about', (req, res) => {
-  res.render('pages/about', { settings: res.locals.settings || {} });
-});
-
-router.get('/portfolio', (req, res) => {
-  res.render('pages/portfolio', { settings: res.locals.settings || {} });
-});
-
-router.get('/portfolio/:slug', (req, res) => {
-  res.render('pages/portfolio-detail', { settings: res.locals.settings || {} });
-});
-
-router.get('/services', (req, res) => {
-  res.render('pages/services', { settings: res.locals.settings || {} });
-});
-
-router.get('/services/:slug', (req, res) => {
-  res.render('pages/service-detail', { settings: res.locals.settings || {} });
-});
-
-router.get('/blog', (req, res) => {
-  res.render('pages/blog', { settings: res.locals.settings || {} });
-});
-
-router.get('/blog/:slug', (req, res) => {
-  res.render('pages/blog-detail', { settings: res.locals.settings || {} });
-});
-
-router.get('/contact', (req, res) => {
-  res.render('pages/contact', { settings: res.locals.settings || {} });
-});
-
-router.post('/contact', (req, res) => {
-  // TODO: Implement contact form submission in Task 16.1
-  res.redirect('/contact');
-});
+router.get('/', publicController.index);
+router.get('/about', publicController.about);
+router.get('/portfolio', publicController.portfolio);
+router.get('/portfolio/:slug', publicController.portfolioDetail);
+router.get('/services', publicController.services);
+router.get('/services/:slug', publicController.serviceDetail);
+router.get('/blog', publicController.blog);
+router.get('/blog/:slug', publicController.blogDetail);
+router.get('/contact', publicController.contactGet);
+router.post('/contact', contactLimiter, publicController.contactPost);
 
 module.exports = router;

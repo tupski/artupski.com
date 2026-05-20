@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <%- include('../partials/head', { seo: seo || {}, settings: settings, isAdmin: false }) %>
+</head>
+<body class="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+
+  <%- include('../partials/navbar', { settings: settings, currentPath: currentPath || '' }) %>
+
+  <main id="main-content">
+
+    <%# ── Page Header ────────────────────────────────────────────────────────── %>
+    <section class="bg-zinc-950 py-16 sm:py-20" aria-label="Page header">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-3xl font-bold text-white sm:text-4xl">Layanan</h1>
+          <p class="mt-3 text-zinc-400">Solusi digital yang saya tawarkan untuk bisnis Anda</p>
+        </div>
+      </div>
+    </section>
+
+    <%# ── Services Grid ───────────────────────────────────────────────────────── %>
+    <section class="py-16 sm:py-20" aria-labelledby="services-grid-heading">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        <h2 id="services-grid-heading" class="sr-only">Daftar layanan</h2>
+
+        <% if (services && services.length > 0) { %>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <% services.forEach(function(service) { %>
+          <article class="flex flex-col rounded-xl border border-zinc-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+
+            <%# Icon / Image %>
+            <% if (service.icon_image) { %>
+            <div class="mb-5">
+              <img
+                src="<%= service.icon_image %>"
+                alt="<%= service.title %> icon"
+                loading="lazy"
+                class="h-14 w-14 rounded-xl object-cover"
+              />
+            </div>
+            <% } else { %>
+            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-cyan-50 dark:bg-cyan-900/30" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m1.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <% } %>
+
+            <h3 class="mb-2 text-xl font-semibold text-zinc-900 dark:text-white">
+              <a href="/services/<%= service.slug %>" class="transition-colors hover:text-cyan-500 dark:hover:text-cyan-400">
+                <%= service.title %>
+              </a>
+            </h3>
+
+            <% if (service.short_description) { %>
+            <p class="mb-4 flex-1 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+              <%= service.short_description %>
+            </p>
+            <% } %>
+
+            <div class="mt-auto flex items-center justify-between pt-4">
+              <% if (service.price_label) { %>
+              <span class="text-sm font-semibold text-cyan-500 dark:text-cyan-400">
+                <%= service.price_label %>
+              </span>
+              <% } else { %>
+              <span></span>
+              <% } %>
+              <a
+                href="/services/<%= service.slug %>"
+                class="inline-flex items-center gap-1 text-sm font-medium text-zinc-500 transition-colors hover:text-cyan-500 dark:text-zinc-400 dark:hover:text-cyan-400"
+                aria-label="Lihat detail layanan <%= service.title %>"
+              >
+                Selengkapnya
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+
+          </article>
+          <% }); %>
+        </div>
+        <% } else { %>
+        <div class="py-20 text-center">
+          <p class="text-zinc-500 dark:text-zinc-400">Belum ada layanan yang tersedia.</p>
+        </div>
+        <% } %>
+
+      </div>
+    </section>
+
+    <%# ── CTA ────────────────────────────────────────────────────────────────── %>
+    <section class="bg-zinc-50 py-16 dark:bg-zinc-900 sm:py-20" aria-labelledby="services-cta-heading">
+      <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <h2 id="services-cta-heading" class="mb-4 text-2xl font-bold text-zinc-900 dark:text-white md:text-3xl">
+          Tidak Menemukan yang Anda Cari?
+        </h2>
+        <p class="mb-8 text-zinc-500 dark:text-zinc-400">
+          Hubungi saya untuk mendiskusikan kebutuhan spesifik Anda.
+        </p>
+        <a
+          href="/contact"
+          class="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-cyan-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+        >
+          Hubungi Saya
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <%- include('../partials/footer', { settings: settings, socialLinks: [] }) %>
+  <%- include('../partials/scripts') %>
+</body>
+</html>

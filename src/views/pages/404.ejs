@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <%
+    const seo404 = {
+      metaTitle: '404 — Halaman Tidak Ditemukan | ' + ((settings && settings.site_name) ? settings.site_name : 'Artupski'),
+      metaDescription: 'Halaman yang Anda cari tidak ditemukan.'
+    };
+  %>
+  <%- include('../partials/head', { seo: seo404, settings: settings, isAdmin: false }) %>
+</head>
+<body class="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+
+  <%- include('../partials/navbar', { settings: settings, currentPath: '' }) %>
+
+  <main id="main-content">
+    <section class="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-4 py-20 text-center" aria-labelledby="error-heading">
+
+      <%# 404 Illustration %>
+      <div class="mb-8 select-none" aria-hidden="true">
+        <span class="text-8xl font-black text-zinc-200 dark:text-zinc-800 sm:text-9xl">404</span>
+      </div>
+
+      <h1 id="error-heading" class="mb-4 text-2xl font-bold text-zinc-900 dark:text-white sm:text-3xl">
+        Halaman Tidak Ditemukan
+      </h1>
+      <p class="mb-8 max-w-md text-zinc-500 dark:text-zinc-400">
+        Maaf, halaman yang Anda cari tidak ada atau telah dipindahkan.
+        Silakan kembali ke halaman utama.
+      </p>
+
+      <div class="flex flex-col items-center gap-4 sm:flex-row">
+        <a
+          href="/"
+          class="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-cyan-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          Kembali ke Beranda
+        </a>
+        <a
+          href="/contact"
+          class="inline-flex items-center gap-2 rounded-lg border border-zinc-300 px-6 py-3 text-base font-semibold text-zinc-700 transition-colors hover:border-cyan-500 hover:text-cyan-500 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-cyan-400 dark:hover:text-cyan-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+        >
+          Hubungi Saya
+        </a>
+      </div>
+
+    </section>
+  </main>
+
+  <%- include('../partials/footer', { settings: settings, socialLinks: [] }) %>
+  <%- include('../partials/scripts') %>
+</body>
+</html>
