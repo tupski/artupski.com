@@ -35,6 +35,11 @@ const apiRouter = require('./routes/api');
 
 const app = express();
 
+// ─── Trust Proxy (Vercel / reverse proxy) ────────────────────────────────────
+// Required for secure cookies and correct IP detection behind Vercel's proxy
+
+app.set('trust proxy', 1);
+
 // ─── View Engine ─────────────────────────────────────────────────────────────
 
 app.set('view engine', 'ejs');
@@ -77,15 +82,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ─── Settings Middleware ───────────────────────────────────────────────────────
-// TODO: Replace this placeholder with the real injectSettings middleware
-// from src/utils/settingsManager.js once Task 4.5 is implemented.
-// Example:
-//   const { injectSettings } = require('./utils/settingsManager');
-//   app.use(injectSettings);
-app.use((req, res, next) => {
-  res.locals.settings = res.locals.settings || {};
-  next();
-});
+// Inject all settings from DB into res.locals.settings on every request
+
+const { injectSettings } = require('./utils/settingsManager');
+app.use(injectSettings);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
