@@ -1,48 +1,19 @@
+'use strict';
+
 /**
  * Services Controller (Admin)
  * Handles CRUD operations for the services CMS module.
- *
- * Routes:
- *   GET    /admin/services            → index
- *   GET    /admin/services/create     → create
- *   POST   /admin/services            → store
- *   GET    /admin/services/:id/edit   → edit
- *   PUT    /admin/services/:id        → update
- *   DELETE /admin/services/:id        → destroy
- *
- * Requirements: 9.1, 9.2
+ * Uses Supabase Storage for icon/image uploads.
  */
 
-'use strict';
-
-const path                              = require('path');
-const Service                           = require('../models/Service');
+const Service = require('../models/Service');
 const { generateSlug, ensureUniqueSlug } = require('../utils/slugGenerator');
-const { upload }                        = require('../config/multer');
+const { upload } = require('../config/multer');
+const { uploadToSupabase } = require('../utils/mediaHandler');
 
-// ─── Multer middleware for icon_image field ───────────────────────────────────
+// Multer middleware for icon_image field (memory storage)
 const uploadIcon = upload.single('icon_image');
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-/**
- * Build the public path for an uploaded file (relative to /uploads/).
- * Returns null if no file was uploaded.
- *
- * @param {Express.Multer.File|undefined} file
- * @returns {string|null}
- */
-function buildUploadPath(file) {
-  if (!file) return null;
-  return '/uploads/' + file.filename;
-}
-
-// ─── Controller actions ───────────────────────────────────────────────────────
-
-/**
- * GET /admin/services
- * List all services sorted by sort_order ASC.
- */
 async function index(req, res, next) {
   try {
     const services = await Service.findAll();
@@ -57,7 +28,6 @@ async function index(req, res, next) {
       errorMessage:   req.session.errorMessage   || null,
     });
 
-    // Clear flash messages after rendering
     delete req.session.successMessage;
     delete req.session.errorMessage;
   } catch (err) {
@@ -65,10 +35,6 @@ async function index(req, res, next) {
   }
 }
 
-/**
- * GET /admin/services/create
- * Render the create service form.
- */
 async function create(req, res, next) {
   try {
     res.render('admin/services/create', {
@@ -88,12 +54,7 @@ async function create(req, res, next) {
   }
 }
 
-/**
- * POST /admin/services
- * Validate, auto-generate slug, handle icon upload, and save new service.
- */
 async function store(req, res, next) {
-  // Run multer first, then handle the rest
   uploadIcon(req, res, async function (uploadErr) {
     try {
       if (uploadErr) {
@@ -103,27 +64,24 @@ async function store(req, res, next) {
       }
 
       const {
-        title,
-        slug: rawSlug,
-        short_description,
-        full_description,
-        price_label,
-        sort_order,
-        status,
+        title, slug: rawSlug, short_description, full_description,
+        price_label, sort_order, status,
       } = req.body;
 
-      // Basic validation
       if (!title || !title.trim()) {
         req.session.errorMessage = 'Judul service wajib diisi.';
         req.session.formData     = req.body;
         return res.redirect('/admin/services/create');
       }
 
-      // Generate slug from title if not provided
-      const baseSlug  = (rawSlug && rawSlug.trim()) ? generateSlug(rawSlug.trim()) : generateSlug(title.trim());
+      const baseSlug  = rawSlug && rawSlug.trim() ? generateSlug(rawSlug.trim()) : generateSlug(title.trim());
       const finalSlug = await ensureUniqueSlug(baseSlug, Service);
 
-      const iconPath = buildUploadPath(req.file);
+      // Upload icon to Supabase Storage
+      let iconPath = null;
+      if (req.file) {
+        iconPath = await uploadToSupabase(req.file, { folder: 'services' });
+      }
 
       await Service.create({
         title:             title.trim(),
@@ -144,10 +102,6 @@ async function store(req, res, next) {
   });
 }
 
-/**
- * GET /admin/services/:id/edit
- * Render the edit form with current service data.
- */
 async function edit(req, res, next) {
   try {
     const service = await Service.findById(req.params.id);
@@ -173,10 +127,6 @@ async function edit(req, res, next) {
   }
 }
 
-/**
- * PUT /admin/services/:id
- * Validate, handle image upload, and update existing service.
- */
 async function update(req, res, next) {
   const { id } = req.params;
 
@@ -194,13 +144,8 @@ async function update(req, res, next) {
       }
 
       const {
-        title,
-        slug: rawSlug,
-        short_description,
-        full_description,
-        price_label,
-        sort_order,
-        status,
+        title, slug: rawSlug, short_description, full_description,
+        price_label, sort_order, status,
       } = req.body;
 
       if (!title || !title.trim()) {
@@ -208,12 +153,14 @@ async function update(req, res, next) {
         return res.redirect(`/admin/services/${id}/edit`);
       }
 
-      // Validate slug uniqueness excluding current record
-      const baseSlug  = (rawSlug && rawSlug.trim()) ? generateSlug(rawSlug.trim()) : generateSlug(title.trim());
+      const baseSlug  = rawSlug && rawSlug.trim() ? generateSlug(rawSlug.trim()) : generateSlug(title.trim());
       const finalSlug = await ensureUniqueSlug(baseSlug, Service, parseInt(id, 10));
 
-      // Use new upload if provided, otherwise keep existing
-      const iconPath = req.file ? buildUploadPath(req.file) : existing.icon_image;
+      // Upload new icon to Supabase Storage (keep existing if no new file)
+      let iconPath = existing.icon_image;
+      if (req.file) {
+        iconPath = await uploadToSupabase(req.file, { folder: 'services' });
+      }
 
       await Service.update(id, {
         title:             title.trim(),
@@ -234,10 +181,6 @@ async function update(req, res, next) {
   });
 }
 
-/**
- * DELETE /admin/services/:id
- * Delete a service by ID.
- */
 async function destroy(req, res, next) {
   try {
     const service = await Service.findById(req.params.id);
