@@ -1,0 +1,61 @@
+<%#
+  layouts/main.ejs — Public website layout
+  ============================================================
+  Usage pattern (each public page includes this layout):
+    Each page file is a complete HTML document that includes
+    the partials directly at the top and bottom.
+
+  Variables expected by this layout:
+    - title        {string}  Page title
+    - seo          {object}  SEO meta object from SEO_Helper
+    - settings     {object}  res.locals.settings
+    - socialLinks  {Array}   Active social links (optional)
+    - currentPath  {string}  req.path for active nav highlighting
+    - content      {string}  Page-specific HTML content (<%- content %>)
+
+  How to use in a page view:
+    <%- include('../layouts/main', { content: pageContent, ...locals }) %>
+
+  Or, more commonly, each page includes partials directly:
+    <%- include('../partials/head', { seo, settings }) %>
+    ... page HTML ...
+    <%- include('../partials/scripts') %>
+  ============================================================
+%>
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <%- include('../partials/head', { seo: typeof seo !== 'undefined' ? seo : {}, settings: settings, isAdmin: false }) %>
+</head>
+<body class="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+
+  <%# ── Navbar ──────────────────────────────────────────────────────────────── %>
+  <%- include('../partials/navbar', { settings: settings, currentPath: typeof currentPath !== 'undefined' ? currentPath : '' }) %>
+
+  <%# ── Flash Alerts (if any) ──────────────────────────────────────────────── %>
+  <% if ((typeof successMessage !== 'undefined' && successMessage) || (typeof errorMessage !== 'undefined' && errorMessage) || (typeof infoMessage !== 'undefined' && infoMessage)) { %>
+    <div class="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+      <%- include('../partials/alerts', {
+        successMessage: typeof successMessage !== 'undefined' ? successMessage : null,
+        errorMessage:   typeof errorMessage   !== 'undefined' ? errorMessage   : null,
+        infoMessage:    typeof infoMessage    !== 'undefined' ? infoMessage    : null
+      }) %>
+    </div>
+  <% } %>
+
+  <%# ── Main Content ────────────────────────────────────────────────────────── %>
+  <main id="main-content">
+    <%- content %>
+  </main>
+
+  <%# ── Footer ─────────────────────────────────────────────────────────────── %>
+  <%- include('../partials/footer', {
+    settings: settings,
+    socialLinks: typeof socialLinks !== 'undefined' ? socialLinks : []
+  }) %>
+
+  <%# ── Scripts ─────────────────────────────────────────────────────────────── %>
+  <%- include('../partials/scripts') %>
+
+</body>
+</html>

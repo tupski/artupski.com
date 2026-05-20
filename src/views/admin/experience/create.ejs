@@ -1,0 +1,233 @@
+<%#
+  admin/experience/create.ejs — Add new work experience
+  Variables expected:
+    - pageTitle    {string}  'Tambah Experience'
+    - activePage   {string}  'experience'
+    - settings     {object}  res.locals.settings
+    - unreadCount  {number}  Unread messages count
+    - errorMessage {string|null}
+    - formData     {object}  Previously submitted values (for re-population on error)
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../../partials/head', {
+    seo: { metaTitle: 'Tambah Experience — Admin' },
+    settings: settings,
+    isAdmin: true
+  }) %>
+</head>
+<body class="antialiased">
+
+  <%- include('../../partials/sidebar', {
+    settings:    settings,
+    unreadCount: unreadCount || 0,
+    activePage:  'experience'
+  }) %>
+
+  <div class="page-wrapper">
+
+    <%# ── Page Header ──────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <%# Breadcrumb %>
+            <ol class="breadcrumb" aria-label="breadcrumbs">
+              <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="/admin/experience">Experience</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Tambah</li>
+            </ol>
+            <h2 class="page-title">Tambah Experience</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Body ─────────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+
+        <%- include('../../partials/alerts', {
+          successMessage: null,
+          errorMessage:   errorMessage,
+          infoMessage:    null
+        }) %>
+
+        <div class="row justify-content-center">
+          <div class="col-12 col-lg-8">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Informasi Experience</h3>
+              </div>
+              <div class="card-body">
+
+                <form action="/admin/experience" method="POST" novalidate>
+
+                  <%# Company Name %>
+                  <div class="mb-3">
+                    <label for="company_name" class="form-label required">
+                      Nama Perusahaan
+                    </label>
+                    <input
+                      type="text"
+                      id="company_name"
+                      name="company_name"
+                      class="form-control"
+                      placeholder="Contoh: PT. Teknologi Maju"
+                      value="<%= (formData && formData.company_name) ? formData.company_name : '' %>"
+                      required
+                      maxlength="255"
+                      aria-required="true"
+                    />
+                  </div>
+
+                  <%# Position %>
+                  <div class="mb-3">
+                    <label for="position" class="form-label required">
+                      Posisi / Jabatan
+                    </label>
+                    <input
+                      type="text"
+                      id="position"
+                      name="position"
+                      class="form-control"
+                      placeholder="Contoh: Full Stack Developer"
+                      value="<%= (formData && formData.position) ? formData.position : '' %>"
+                      required
+                      maxlength="255"
+                      aria-required="true"
+                    />
+                  </div>
+
+                  <%# Description %>
+                  <div class="mb-3">
+                    <label for="description" class="form-label">
+                      Deskripsi
+                      <span class="text-muted small">(opsional)</span>
+                    </label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      class="form-control"
+                      rows="4"
+                      placeholder="Deskripsikan tanggung jawab dan pencapaian Anda..."
+                    ><%= (formData && formData.description) ? formData.description : '' %></textarea>
+                  </div>
+
+                  <%# Date row %>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="start_date" class="form-label required">
+                        Tanggal Mulai
+                      </label>
+                      <input
+                        type="date"
+                        id="start_date"
+                        name="start_date"
+                        class="form-control"
+                        value="<%= (formData && formData.start_date) ? formData.start_date : '' %>"
+                        required
+                        aria-required="true"
+                      />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="end_date" class="form-label">
+                        Tanggal Selesai
+                        <span class="text-muted small">(kosongkan jika masih aktif)</span>
+                      </label>
+                      <input
+                        type="date"
+                        id="end_date"
+                        name="end_date"
+                        class="form-control"
+                        value="<%= (formData && formData.end_date) ? formData.end_date : '' %>"
+                        aria-describedby="end_date_hint"
+                      />
+                      <div id="end_date_hint" class="form-hint">
+                        Tidak perlu diisi jika <em>Masih Bekerja di Sini</em> dicentang.
+                      </div>
+                    </div>
+                  </div>
+
+                  <%# Is Current %>
+                  <div class="mb-4">
+                    <label class="form-check" for="is_current">
+                      <input
+                        type="checkbox"
+                        id="is_current"
+                        name="is_current"
+                        class="form-check-input"
+                        value="on"
+                        <%= (formData && formData.is_current) ? 'checked' : '' %>
+                        onchange="toggleEndDate(this)"
+                      />
+                      <span class="form-check-label">Masih Bekerja di Sini</span>
+                    </label>
+                  </div>
+
+                  <%# Actions %>
+                  <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                      Simpan Experience
+                    </button>
+                    <a href="/admin/experience" class="btn btn-outline-secondary">
+                      Batal
+                    </a>
+                  </div>
+
+                </form>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+  <script src="/js/admin.js"></script>
+  <script>
+    /**
+     * Toggle end_date field disabled state based on is_current checkbox.
+     * When "Masih Bekerja di Sini" is checked, end_date is disabled and cleared.
+     */
+    function toggleEndDate(checkbox) {
+      var endDateInput = document.getElementById('end_date');
+      if (!endDateInput) return;
+      if (checkbox.checked) {
+        endDateInput.disabled = true;
+        endDateInput.value    = '';
+      } else {
+        endDateInput.disabled = false;
+      }
+    }
+
+    // Apply on page load in case checkbox is pre-checked
+    (function () {
+      var checkbox = document.getElementById('is_current');
+      if (checkbox) toggleEndDate(checkbox);
+    })();
+  </script>
+
+</body>
+</html>

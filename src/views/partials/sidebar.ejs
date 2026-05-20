@@ -1,0 +1,238 @@
+<%#
+  partials/sidebar.ejs — Tabler admin sidebar
+  Variables expected:
+    - settings      {object}  res.locals.settings (site_name, logo)
+    - unreadCount   {number}  Count of unread contact messages (default 0)
+    - activePage    {string}  Current page key for active state highlighting
+                              e.g. 'dashboard', 'portfolio', 'blog', 'services',
+                                   'skills', 'experience', 'social-links',
+                                   'messages', 'settings'
+%>
+<% const siteName   = (settings && settings.site_name) ? settings.site_name : 'Artupski'; %>
+<% const logoPath   = (settings && settings.logo) ? settings.logo : null; %>
+<% const unread     = (typeof unreadCount !== 'undefined' && unreadCount > 0) ? unreadCount : 0; %>
+<% const active     = typeof activePage !== 'undefined' ? activePage : ''; %>
+
+<aside class="navbar-vertical navbar navbar-expand-lg" data-bs-theme="dark">
+  <div class="container-fluid">
+
+    <%# ── Brand ──────────────────────────────────────────────────────────── %>
+    <a href="/admin" class="navbar-brand navbar-brand-autodark">
+      <% if (logoPath) { %>
+        <img src="<%= logoPath %>" alt="<%= siteName %>" class="navbar-brand-image" />
+      <% } else { %>
+        <span class="fw-bold text-cyan-400">&lt;<%= siteName %>/&gt;</span>
+      <% } %>
+    </a>
+
+    <%# ── Mobile toggle ──────────────────────────────────────────────────── %>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebar-menu"
+      aria-controls="sidebar-menu"
+      aria-expanded="false"
+      aria-label="Toggle sidebar navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <%# ── Sidebar Nav ─────────────────────────────────────────────────────── %>
+    <div class="collapse navbar-collapse" id="sidebar-menu">
+      <ul class="navbar-nav pt-lg-3">
+
+        <%# Dashboard %>
+        <li class="nav-item">
+          <a class="nav-link <%= active === 'dashboard' ? 'active' : '' %>" href="/admin">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
+                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+              </svg>
+            </span>
+            <span class="nav-link-title">Dashboard</span>
+          </a>
+        </li>
+
+        <%# Portfolio %>
+        <li class="nav-item">
+          <a class="nav-link <%= active === 'portfolio' ? 'active' : '' %>" href="/admin/portfolio">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" />
+                <path d="M3 9h18" />
+              </svg>
+            </span>
+            <span class="nav-link-title">Portfolio</span>
+          </a>
+        </li>
+
+        <%# Blog %>
+        <li class="nav-item">
+          <a class="nav-link <%= active === 'blog' ? 'active' : '' %>" href="/admin/blog">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-11a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1m3 0v18" />
+                <path d="M13 8l2 0" />
+                <path d="M13 12l2 0" />
+              </svg>
+            </span>
+            <span class="nav-link-title">Blog</span>
+          </a>
+        </li>
+
+        <%# Services %>
+        <li class="nav-item">
+          <a class="nav-link <%= active === 'services' ? 'active' : '' %>" href="/admin/services">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" />
+                <path d="M12 12l8 -4.5" />
+                <path d="M12 12l0 9" />
+                <path d="M12 12l-8 -4.5" />
+              </svg>
+            </span>
+            <span class="nav-link-title">Services</span>
+          </a>
+        </li>
+
+        <%# Skills %>
+        <li class="nav-item">
+          <a class="nav-link <%= active === 'skills' ? 'active' : '' %>" href="/admin/skills">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 12h1m8 -9v1m8 8h1m-15.4 -6.4l.7 .7m12.1 -.7l-.7 .7" />
+                <path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0 -1 3a2 2 0 0 1 -4 0a3.5 3.5 0 0 0 -1 -3" />
+                <path d="M9.7 17l4.6 0" />
+              </svg>
+            </span>
+            <span class="nav-link-title">Skills</span>
+          </a>
+        </li>
+
+        <%# Experience %>
+        <li class="nav-item">
+          <a class="nav-link <%= active === 'experience' ? 'active' : '' %>" href="/admin/experience">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" />
+                <path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" />
+                <path d="M12 12l0 .01" />
+                <path d="M3 13a20 20 0 0 0 18 0" />
+              </svg>
+            </span>
+            <span class="nav-link-title">Experience</span>
+          </a>
+        </li>
+
+        <%# Social Links %>
+        <li class="nav-item">
+          <a class="nav-link <%= active === 'social-links' ? 'active' : '' %>" href="/admin/social-links">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                <path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                <path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                <path d="M8.7 10.7l6.6 -3.4" />
+                <path d="M8.7 13.3l6.6 3.4" />
+              </svg>
+            </span>
+            <span class="nav-link-title">Social Links</span>
+          </a>
+        </li>
+
+        <%# Divider %>
+        <li class="nav-item mt-2">
+          <div class="nav-link text-uppercase text-muted small fw-bold" style="font-size:0.65rem; letter-spacing:0.08em; pointer-events:none;">
+            Inbox
+          </div>
+        </li>
+
+        <%# Messages with unread badge %>
+        <li class="nav-item">
+          <a class="nav-link <%= active === 'messages' ? 'active' : '' %>" href="/admin/messages">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-6l-4 4v-4h-4a2 2 0 0 1 -2 -2z" />
+              </svg>
+            </span>
+            <span class="nav-link-title">
+              Messages
+              <% if (unread > 0) { %>
+                <span
+                  id="unread-badge"
+                  class="badge bg-danger ms-auto"
+                  aria-label="<%= unread %> unread messages"
+                >
+                  <%= unread %>
+                </span>
+              <% } else { %>
+                <span
+                  id="unread-badge"
+                  class="badge bg-danger ms-auto d-none"
+                  aria-label="0 unread messages"
+                >
+                  0
+                </span>
+              <% } %>
+            </span>
+          </a>
+        </li>
+
+        <%# Divider %>
+        <li class="nav-item mt-2">
+          <div class="nav-link text-uppercase text-muted small fw-bold" style="font-size:0.65rem; letter-spacing:0.08em; pointer-events:none;">
+            Configuration
+          </div>
+        </li>
+
+        <%# Settings %>
+        <li class="nav-item">
+          <a class="nav-link <%= active === 'settings' ? 'active' : '' %>" href="/admin/settings">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
+                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+              </svg>
+            </span>
+            <span class="nav-link-title">Settings</span>
+          </a>
+        </li>
+
+        <%# Divider %>
+        <li class="nav-item mt-2">
+          <div class="nav-link text-uppercase text-muted small fw-bold" style="font-size:0.65rem; letter-spacing:0.08em; pointer-events:none;">
+            Account
+          </div>
+        </li>
+
+        <%# Logout %>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/logout">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+                <path d="M9 12h12l-3 -3" />
+                <path d="M18 15l3 -3" />
+              </svg>
+            </span>
+            <span class="nav-link-title">Logout</span>
+          </a>
+        </li>
+
+      </ul>
+    </div>
+  </div>
+</aside>

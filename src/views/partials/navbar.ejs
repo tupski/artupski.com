@@ -1,0 +1,124 @@
+<%#
+  partials/navbar.ejs — Public sticky navbar
+  Variables expected:
+    - settings  {object}  res.locals.settings (site_name, logo)
+    - currentPath {string} req.path — used to highlight active link (optional)
+%>
+<% const siteName = (settings && settings.site_name) ? settings.site_name : 'Artupski'; %>
+<% const logoPath  = (settings && settings.logo) ? settings.logo : null; %>
+<% const path = typeof currentPath !== 'undefined' ? currentPath : ''; %>
+
+<header class="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/90 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90">
+  <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8" aria-label="Main navigation">
+
+    <%# ── Brand / Logo ──────────────────────────────────────────────────────── %>
+    <a href="/" class="flex items-center gap-2 text-xl font-bold text-zinc-900 transition-colors hover:text-cyan-500 dark:text-white dark:hover:text-cyan-400" aria-label="<%= siteName %> — Home">
+      <% if (logoPath) { %>
+        <img src="<%= logoPath %>" alt="<%= siteName %> logo" class="h-8 w-auto" loading="lazy" />
+      <% } else { %>
+        <span class="text-cyan-500 dark:text-cyan-400">&lt;</span><%= siteName %><span class="text-cyan-500 dark:text-cyan-400">/&gt;</span>
+      <% } %>
+    </a>
+
+    <%# ── Desktop Navigation Links ──────────────────────────────────────────── %>
+    <ul class="hidden items-center gap-1 md:flex" role="list">
+      <% const navLinks = [
+        { href: '/',          label: 'Home' },
+        { href: '/about',     label: 'About' },
+        { href: '/portfolio', label: 'Portfolio' },
+        { href: '/services',  label: 'Services' },
+        { href: '/blog',      label: 'Blog' },
+        { href: '/contact',   label: 'Contact' },
+      ]; %>
+      <% navLinks.forEach(function(link) { %>
+        <% const isActive = (path === link.href) || (link.href !== '/' && path.startsWith(link.href)); %>
+        <li>
+          <a
+            href="<%= link.href %>"
+            class="rounded-md px-3 py-2 text-sm font-medium transition-colors
+              <%= isActive
+                ? 'text-cyan-500 dark:text-cyan-400'
+                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white' %>"
+            <% if (isActive) { %>aria-current="page"<% } %>
+          >
+            <%= link.label %>
+          </a>
+        </li>
+      <% }); %>
+    </ul>
+
+    <%# ── Right Side: Theme Toggle + Hamburger ──────────────────────────────── %>
+    <div class="flex items-center gap-2">
+
+      <%# Theme Toggle Button %>
+      <button
+        id="theme-toggle"
+        type="button"
+        aria-label="Toggle dark/light mode"
+        class="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+      >
+        <%# Sun icon — shown in dark mode %>
+        <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+        </svg>
+        <%# Moon icon — shown in light mode %>
+        <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="block h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+        </svg>
+      </button>
+
+      <%# Hamburger Menu Button — mobile only %>
+      <button
+        id="mobile-menu-toggle"
+        type="button"
+        aria-label="Open navigation menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        class="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white md:hidden"
+      >
+        <%# Hamburger icon %>
+        <svg id="icon-menu" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <%# Close icon — hidden by default %>
+        <svg id="icon-close" xmlns="http://www.w3.org/2000/svg" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+    </div>
+  </nav>
+
+  <%# ── Mobile Menu ────────────────────────────────────────────────────────── %>
+  <div
+    id="mobile-menu"
+    class="hidden border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 md:hidden"
+    aria-label="Mobile navigation"
+  >
+    <ul class="flex flex-col px-4 py-3" role="list">
+      <% const mobileLinks = [
+        { href: '/',          label: 'Home' },
+        { href: '/about',     label: 'About' },
+        { href: '/portfolio', label: 'Portfolio' },
+        { href: '/services',  label: 'Services' },
+        { href: '/blog',      label: 'Blog' },
+        { href: '/contact',   label: 'Contact' },
+      ]; %>
+      <% mobileLinks.forEach(function(link) { %>
+        <% const isActive = (path === link.href) || (link.href !== '/' && path.startsWith(link.href)); %>
+        <li>
+          <a
+            href="<%= link.href %>"
+            class="block rounded-md px-3 py-3 text-base font-medium transition-colors
+              <%= isActive
+                ? 'text-cyan-500 dark:text-cyan-400'
+                : 'text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white' %>"
+            <% if (isActive) { %>aria-current="page"<% } %>
+          >
+            <%= link.label %>
+          </a>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+</header>

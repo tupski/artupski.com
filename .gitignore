@@ -1,0 +1,63 @@
+# Dependencies
+node_modules/
+
+# Environment variables — JANGAN commit file ini
+.env
+.env.local
+.env.*.local
+
+# User-uploaded media
+src/public/uploads/*
+!src/public/uploads/.gitkeep
+
+# Log files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Database files (SQLite — jika digunakan secara lokal)
+*.db
+*.sqlite
+*.sqlite3
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build output
+dist/
+build/
+
+# TailwindCSS compiled output (generated, tidak perlu di-commit)
+src/public/css/output.css
+
+# PM2
+.pm2/
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Vercel
+.vercel/
+
+# Lainnya
+.kiro/

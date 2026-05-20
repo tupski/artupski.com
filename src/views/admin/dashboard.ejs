@@ -1,0 +1,497 @@
+<%#
+  admin/dashboard.ejs — Admin Dashboard
+  ============================================================
+  Variables expected:
+    - pageTitle        {string}  'Dashboard'
+    - activePage       {string}  'dashboard'
+    - settings         {object}  res.locals.settings
+    - unreadCount      {number}  Unread contact messages count
+    - portfolioCount   {number}  Total portfolio items
+    - blogCount        {number}  Total blog posts
+    - serviceCount     {number}  Total services
+    - recentPortfolios {Array}   Latest 5 portfolio items
+    - recentBlogPosts  {Array}   Latest 5 blog posts
+    - recentMessages   {Array}   Latest 5 contact messages
+  ============================================================
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../partials/head', {
+    seo: { metaTitle: 'Dashboard — Admin' },
+    settings: settings,
+    isAdmin: true
+  }) %>
+  <style>
+    .navbar-brand .text-cyan-400 { color: #22d3ee !important; }
+  </style>
+</head>
+<body class="antialiased">
+
+  <%- include('../partials/sidebar', {
+    settings:    settings,
+    unreadCount: unreadCount || 0,
+    activePage:  'dashboard'
+  }) %>
+
+  <div class="page-wrapper">
+
+    <%# ── Page Header ──────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <h2 class="page-title">Dashboard</h2>
+            <div class="text-muted mt-1">
+              Selamat datang di panel admin <%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %>.
+            </div>
+          </div>
+          <div class="col-auto ms-auto d-print-none">
+            <div class="d-flex align-items-center gap-2">
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-outline-secondary btn-sm d-none d-sm-inline-flex align-items-center gap-1"
+                aria-label="View public website"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+                  <path d="M11 13l9 -9" />
+                  <path d="M15 4h5v5" />
+                </svg>
+                View Site
+              </a>
+              <button
+                id="theme-toggle"
+                type="button"
+                aria-label="Toggle dark/light mode"
+                class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                style="width:2.25rem; height:2.25rem; padding:0;"
+              >
+                <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm d-none" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                  <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
+                </svg>
+                <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Body ─────────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+
+        <%- include('../partials/alerts', {
+          successMessage: typeof successMessage !== 'undefined' ? successMessage : null,
+          errorMessage:   typeof errorMessage   !== 'undefined' ? errorMessage   : null,
+          infoMessage:    typeof infoMessage    !== 'undefined' ? infoMessage    : null
+        }) %>
+
+        <%# ── Stats Widgets ──────────────────────────────────────────────── %>
+        <div class="row row-deck row-cards mb-4">
+
+          <%# Portfolio count %>
+          <div class="col-sm-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="subheader">Total Portfolio</div>
+                </div>
+                <div class="h1 mb-3"><%= portfolioCount || 0 %></div>
+                <div class="d-flex mb-2">
+                  <div>Projects</div>
+                  <div class="ms-auto">
+                    <a href="/admin/portfolio" class="text-secondary">Lihat semua &rarr;</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%# Blog count %>
+          <div class="col-sm-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="subheader">Total Blog Posts</div>
+                </div>
+                <div class="h1 mb-3"><%= blogCount || 0 %></div>
+                <div class="d-flex mb-2">
+                  <div>Artikel</div>
+                  <div class="ms-auto">
+                    <a href="/admin/blog" class="text-secondary">Lihat semua &rarr;</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%# Services count %>
+          <div class="col-sm-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="subheader">Total Services</div>
+                </div>
+                <div class="h1 mb-3"><%= serviceCount || 0 %></div>
+                <div class="d-flex mb-2">
+                  <div>Layanan</div>
+                  <div class="ms-auto">
+                    <a href="/admin/services" class="text-secondary">Lihat semua &rarr;</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%# Unread messages count %>
+          <div class="col-sm-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="subheader">Pesan Belum Dibaca</div>
+                  <% if (unreadCount > 0) { %>
+                    <span class="badge bg-danger ms-auto"><%= unreadCount %></span>
+                  <% } %>
+                </div>
+                <div class="h1 mb-3"><%= unreadCount || 0 %></div>
+                <div class="d-flex mb-2">
+                  <div>Pesan masuk</div>
+                  <div class="ms-auto">
+                    <a href="/admin/messages" class="text-secondary">Lihat semua &rarr;</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <%# ── Quick Actions ───────────────────────────────────────────────── %>
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quick Actions</h3>
+              </div>
+              <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                  <a href="/admin/blog/create" class="btn btn-primary d-inline-flex align-items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M12 5l0 14" />
+                      <path d="M5 12l14 0" />
+                    </svg>
+                    Tambah Blog
+                  </a>
+                  <a href="/admin/portfolio/create" class="btn btn-success d-inline-flex align-items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M12 5l0 14" />
+                      <path d="M5 12l14 0" />
+                    </svg>
+                    Tambah Portfolio
+                  </a>
+                  <a href="/admin/services/create" class="btn btn-info d-inline-flex align-items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M12 5l0 14" />
+                      <path d="M5 12l14 0" />
+                    </svg>
+                    Tambah Service
+                  </a>
+                  <a href="/admin/settings" class="btn btn-secondary d-inline-flex align-items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
+                      <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                    </svg>
+                    Edit Settings
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%# ── Recent Items + Chart ────────────────────────────────────────── %>
+        <div class="row row-deck row-cards">
+
+          <%# Recent Portfolio Items %>
+          <div class="col-md-6 col-lg-4">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Portfolio Terbaru</h3>
+                <div class="card-options">
+                  <a href="/admin/portfolio" class="card-options-link text-secondary small">Lihat semua</a>
+                </div>
+              </div>
+              <div class="list-group list-group-flush">
+                <% if (recentPortfolios && recentPortfolios.length > 0) { %>
+                  <% recentPortfolios.forEach(function(item) { %>
+                    <div class="list-group-item">
+                      <div class="row align-items-center">
+                        <div class="col text-truncate">
+                          <a href="/admin/portfolio" class="text-body d-block text-truncate">
+                            <%= item.title %>
+                          </a>
+                          <div class="d-block text-muted text-truncate mt-n1 small">
+                            <%= item.category || 'Uncategorized' %>
+                          </div>
+                        </div>
+                        <div class="col-auto">
+                          <span class="badge <%= item.status === 'published' ? 'bg-success' : 'bg-secondary' %> badge-sm">
+                            <%= item.status === 'published' ? 'Published' : 'Draft' %>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="list-group-item text-muted small">Belum ada portfolio.</div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <%# Recent Blog Posts %>
+          <div class="col-md-6 col-lg-4">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Blog Terbaru</h3>
+                <div class="card-options">
+                  <a href="/admin/blog" class="card-options-link text-secondary small">Lihat semua</a>
+                </div>
+              </div>
+              <div class="list-group list-group-flush">
+                <% if (recentBlogPosts && recentBlogPosts.length > 0) { %>
+                  <% recentBlogPosts.forEach(function(post) { %>
+                    <div class="list-group-item">
+                      <div class="row align-items-center">
+                        <div class="col text-truncate">
+                          <a href="/admin/blog" class="text-body d-block text-truncate">
+                            <%= post.title %>
+                          </a>
+                          <div class="d-block text-muted text-truncate mt-n1 small">
+                            <% if (post.published_at) { %>
+                              <%= new Date(post.published_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                            <% } else { %>
+                              Belum dipublish
+                            <% } %>
+                          </div>
+                        </div>
+                        <div class="col-auto">
+                          <span class="badge <%= post.status === 'published' ? 'bg-success' : 'bg-secondary' %> badge-sm">
+                            <%= post.status === 'published' ? 'Published' : 'Draft' %>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="list-group-item text-muted small">Belum ada blog post.</div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <%# Recent Messages %>
+          <div class="col-md-6 col-lg-4">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Pesan Terbaru</h3>
+                <div class="card-options">
+                  <a href="/admin/messages" class="card-options-link text-secondary small">Lihat semua</a>
+                </div>
+              </div>
+              <div class="list-group list-group-flush">
+                <% if (recentMessages && recentMessages.length > 0) { %>
+                  <% recentMessages.forEach(function(msg) { %>
+                    <div class="list-group-item">
+                      <div class="row align-items-center">
+                        <div class="col text-truncate">
+                          <a href="/admin/messages" class="text-body d-block text-truncate">
+                            <%= msg.name %>
+                          </a>
+                          <div class="d-block text-muted text-truncate mt-n1 small">
+                            <%= msg.subject %>
+                          </div>
+                        </div>
+                        <div class="col-auto">
+                          <span class="badge <%= msg.status === 'unread' ? 'bg-danger' : 'bg-secondary' %> badge-sm">
+                            <%= msg.status === 'unread' ? 'Unread' : 'Read' %>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="list-group-item text-muted small">Belum ada pesan masuk.</div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <%# Chart.js — Messages per Month %>
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Statistik Pesan per Bulan</h3>
+              </div>
+              <div class="card-body">
+                <div id="chart-messages" style="height: 240px;">
+                  <canvas id="messagesChart" aria-label="Grafik pesan per bulan" role="img"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><%# end row %>
+
+      </div><%# end container-xl %>
+    </div><%# end page-body %>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-lg-auto ms-lg-auto">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                <a href="/" target="_blank" rel="noopener noreferrer" class="link-secondary">View Site</a>
+              </li>
+              <li class="list-inline-item">
+                <a href="/admin/settings" class="link-secondary">Settings</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <%# ── Tabler JS ──────────────────────────────────────────────────────────── %>
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+
+  <%# ── Chart.js ───────────────────────────────────────────────────────────── %>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <%# ── Admin JS ───────────────────────────────────────────────────────────── %>
+  <script src="/js/admin.js"></script>
+
+  <%# ── Theme toggle sync ──────────────────────────────────────────────────── %>
+  <script>
+    (function () {
+      var btn  = document.getElementById('theme-toggle');
+      var sun  = document.getElementById('icon-sun');
+      var moon = document.getElementById('icon-moon');
+
+      function syncIcons() {
+        var isDark = document.documentElement.classList.contains('dark');
+        if (sun)  sun.classList.toggle('d-none', !isDark);
+        if (moon) moon.classList.toggle('d-none', isDark);
+      }
+
+      syncIcons();
+
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (typeof toggleTheme === 'function') {
+            toggleTheme();
+          } else {
+            var isDark = document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark', !isDark);
+            try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
+          }
+          syncIcons();
+        });
+      }
+    })();
+  </script>
+
+  <%# ── Messages per Month Chart ───────────────────────────────────────────── %>
+  <script>
+    (function () {
+      var canvas = document.getElementById('messagesChart');
+      if (!canvas) return;
+
+      // Generate last 6 month labels
+      var labels = [];
+      var now = new Date();
+      for (var i = 5; i >= 0; i--) {
+        var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        labels.push(d.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }));
+      }
+
+      var isDark = document.documentElement.classList.contains('dark');
+      var gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+      var labelColor = isDark ? '#94a3b8' : '#64748b';
+
+      new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Pesan Masuk',
+            data: [0, 0, 0, 0, 0, 0],  // Placeholder — will be populated via API in future task
+            backgroundColor: 'rgba(34, 211, 238, 0.5)',
+            borderColor:     'rgba(34, 211, 238, 1)',
+            borderWidth: 1,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: labelColor }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ' ' + ctx.parsed.y + ' pesan';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid:  { color: gridColor },
+              ticks: { color: labelColor }
+            },
+            y: {
+              beginAtZero: true,
+              grid:  { color: gridColor },
+              ticks: {
+                color: labelColor,
+                stepSize: 1,
+                precision: 0
+              }
+            }
+          }
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,374 @@
+<%#
+  admin/services/create.ejs — Create new service form
+  ============================================================
+  Variables expected:
+    - pageTitle    {string}  'Tambah Service'
+    - activePage   {string}  'services'
+    - settings     {object}  res.locals.settings
+    - unreadCount  {number}  Unread messages count
+    - breadcrumbs  {Array}   Breadcrumb trail
+    - errorMessage {string|null}
+    - formData     {object}  Previously submitted form values (on validation error)
+  ============================================================
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../../partials/head', {
+    seo: { metaTitle: 'Tambah Service — Admin' },
+    settings: settings,
+    isAdmin: true
+  }) %>
+  <%# Quill.js CSS %>
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+</head>
+<body class="antialiased">
+
+  <%- include('../../partials/sidebar', {
+    settings:    settings,
+    unreadCount: unreadCount || 0,
+    activePage:  'services'
+  }) %>
+
+  <div class="page-wrapper">
+
+    <%# ── Page Header ──────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+                <li class="breadcrumb-item"><a href="/admin/services">Services</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Tambah</li>
+              </ol>
+            </nav>
+            <h2 class="page-title">Tambah Service</h2>
+          </div>
+          <div class="col-auto ms-auto d-print-none">
+            <div class="d-flex align-items-center gap-2">
+              <button id="theme-toggle" type="button" aria-label="Toggle dark/light mode"
+                      class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                      style="width:2.25rem;height:2.25rem;padding:0;">
+                <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm d-none" width="16" height="16"
+                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                  <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
+                </svg>
+                <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16"
+                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Body ─────────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+
+        <%- include('../../partials/alerts', {
+          successMessage: null,
+          errorMessage:   errorMessage,
+          infoMessage:    null
+        }) %>
+
+        <form
+          action="/admin/services"
+          method="POST"
+          enctype="multipart/form-data"
+          novalidate
+        >
+
+          <div class="row">
+
+            <%# ── Main column ──────────────────────────────────────────────── %>
+            <div class="col-lg-8">
+
+              <%# Title %>
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label for="title" class="form-label required">Judul Service</label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      class="form-control"
+                      placeholder="Contoh: Web Development"
+                      value="<%= (formData && formData.title) ? formData.title : '' %>"
+                      required
+                      maxlength="255"
+                      aria-required="true"
+                    />
+                    <div class="form-hint">Judul akan digunakan untuk generate slug otomatis.</div>
+                  </div>
+
+                  <%# Slug %>
+                  <div class="mb-3">
+                    <label for="slug" class="form-label">Slug</label>
+                    <div class="input-group">
+                      <span class="input-group-text text-muted">/services/</span>
+                      <input
+                        type="text"
+                        id="slug"
+                        name="slug"
+                        class="form-control"
+                        placeholder="web-development (auto-generate jika kosong)"
+                        value="<%= (formData && formData.slug) ? formData.slug : '' %>"
+                        maxlength="100"
+                        pattern="[a-z0-9\-]+"
+                        aria-describedby="slug-hint"
+                      />
+                    </div>
+                    <div id="slug-hint" class="form-hint">Hanya huruf kecil, angka, dan tanda hubung. Kosongkan untuk generate otomatis dari judul.</div>
+                  </div>
+
+                  <%# Short Description %>
+                  <div class="mb-0">
+                    <label for="short_description" class="form-label">Deskripsi Singkat</label>
+                    <textarea
+                      id="short_description"
+                      name="short_description"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Deskripsi singkat yang tampil di halaman services..."
+                      maxlength="500"
+                    ><%= (formData && formData.short_description) ? formData.short_description : '' %></textarea>
+                    <div class="form-hint">Maksimal 500 karakter. Tampil sebagai preview di halaman daftar services.</div>
+                  </div>
+                </div>
+              </div>
+
+              <%# Full Description (Quill) %>
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h3 class="card-title">Deskripsi Lengkap</h3>
+                </div>
+                <div class="card-body">
+                  <%# Hidden input to hold Quill HTML output %>
+                  <input type="hidden" id="full_description" name="full_description"
+                         value="<%= (formData && formData.full_description) ? formData.full_description : '' %>" />
+                  <%# Quill editor container %>
+                  <div
+                    id="quill-editor"
+                    style="min-height:240px;"
+                    aria-label="Editor deskripsi lengkap"
+                  ></div>
+                  <div class="form-hint mt-2">Gunakan editor di atas untuk menulis deskripsi lengkap service.</div>
+                </div>
+              </div>
+
+            </div><%# end col-lg-8 %>
+
+            <%# ── Sidebar column ────────────────────────────────────────────── %>
+            <div class="col-lg-4">
+
+              <%# Publish settings %>
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h3 class="card-title">Pengaturan</h3>
+                </div>
+                <div class="card-body">
+
+                  <%# Status %>
+                  <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="status" class="form-select">
+                      <option value="active"   <%= (!formData || !formData.status || formData.status === 'active')   ? 'selected' : '' %>>Active</option>
+                      <option value="inactive" <%= (formData && formData.status === 'inactive') ? 'selected' : '' %>>Inactive</option>
+                    </select>
+                    <div class="form-hint">Hanya service dengan status Active yang tampil di website.</div>
+                  </div>
+
+                  <%# Sort Order %>
+                  <div class="mb-3">
+                    <label for="sort_order" class="form-label">Urutan Tampil</label>
+                    <input
+                      type="number"
+                      id="sort_order"
+                      name="sort_order"
+                      class="form-control"
+                      value="<%= (formData && formData.sort_order !== undefined) ? formData.sort_order : 0 %>"
+                      min="0"
+                      max="9999"
+                      aria-describedby="sort-hint"
+                    />
+                    <div id="sort-hint" class="form-hint">Angka lebih kecil tampil lebih dulu.</div>
+                  </div>
+
+                  <%# Price Label %>
+                  <div class="mb-0">
+                    <label for="price_label" class="form-label">Label Harga <span class="text-muted">(opsional)</span></label>
+                    <input
+                      type="text"
+                      id="price_label"
+                      name="price_label"
+                      class="form-control"
+                      placeholder="Contoh: Mulai dari Rp 500.000"
+                      value="<%= (formData && formData.price_label) ? formData.price_label : '' %>"
+                      maxlength="100"
+                    />
+                  </div>
+
+                </div>
+              </div>
+
+              <%# Icon / Image upload %>
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h3 class="card-title">Icon / Gambar</h3>
+                </div>
+                <div class="card-body">
+                  <div class="mb-0">
+                    <label for="icon_image" class="form-label">Upload Icon/Gambar <span class="text-muted">(opsional)</span></label>
+                    <input
+                      type="file"
+                      id="icon_image"
+                      name="icon_image"
+                      class="form-control"
+                      accept="image/jpeg,image/png,image/webp"
+                      aria-describedby="icon-hint"
+                    />
+                    <div id="icon-hint" class="form-hint">Format: JPEG, PNG, WebP. Maks. 5MB.</div>
+                  </div>
+                </div>
+              </div>
+
+              <%# Action buttons %>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm me-1" width="16" height="16"
+                       viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                    <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                    <path d="M14 4l0 4l-6 0l0 -4" />
+                  </svg>
+                  Simpan Service
+                </button>
+                <a href="/admin/services" class="btn btn-outline-secondary">Batal</a>
+              </div>
+
+            </div><%# end col-lg-4 %>
+
+          </div><%# end row %>
+
+        </form>
+
+      </div>
+    </div>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-lg-auto ms-lg-auto">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item"><a href="/" target="_blank" rel="noopener noreferrer" class="link-secondary">View Site</a></li>
+              <li class="list-inline-item"><a href="/admin/settings" class="link-secondary">Settings</a></li>
+            </ul>
+          </div>
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+  <%# Quill.js %>
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+  <script src="/js/admin.js"></script>
+
+  <script>
+    (function () {
+      // ── Theme toggle ──────────────────────────────────────────────────────
+      var btn  = document.getElementById('theme-toggle');
+      var sun  = document.getElementById('icon-sun');
+      var moon = document.getElementById('icon-moon');
+      function syncIcons() {
+        var isDark = document.documentElement.classList.contains('dark');
+        if (sun)  sun.classList.toggle('d-none', !isDark);
+        if (moon) moon.classList.toggle('d-none', isDark);
+      }
+      syncIcons();
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (typeof toggleTheme === 'function') { toggleTheme(); }
+          else {
+            var isDark = document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark', !isDark);
+            try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
+          }
+          syncIcons();
+        });
+      }
+
+      // ── Auto-generate slug from title ─────────────────────────────────────
+      var titleInput = document.getElementById('title');
+      var slugInput  = document.getElementById('slug');
+      if (titleInput && slugInput) {
+        titleInput.addEventListener('input', function () {
+          if (slugInput.dataset.userEdited) return;
+          slugInput.value = titleInput.value
+            .toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[\s&+/\\|@#$%^*()\[\]{}<>?!=~`;:'",.]+/g, '-')
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/-{2,}/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .substring(0, 100);
+        });
+        slugInput.addEventListener('input', function () {
+          slugInput.dataset.userEdited = '1';
+        });
+      }
+
+      // ── Quill editor ──────────────────────────────────────────────────────
+      var quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        placeholder: 'Tulis deskripsi lengkap service di sini...',
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['blockquote', 'link'],
+            ['clean']
+          ]
+        }
+      });
+
+      // Pre-fill Quill with existing content (on validation error redirect)
+      var hiddenInput = document.getElementById('full_description');
+      if (hiddenInput && hiddenInput.value) {
+        quill.root.innerHTML = hiddenInput.value;
+      }
+
+      // Sync Quill HTML to hidden input before form submit
+      var form = document.querySelector('form');
+      if (form) {
+        form.addEventListener('submit', function () {
+          hiddenInput.value = quill.root.innerHTML;
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,234 @@
+<%#
+  admin/social-links/create.ejs — Create Social Link Form
+  ============================================================
+  Variables expected:
+    - pageTitle    {string}       'Tambah Social Link'
+    - activePage   {string}       'social-links'
+    - settings     {object}       res.locals.settings
+    - unreadCount  {number}       Unread contact messages count
+    - errorMessage {string|null}  Validation error message
+    - formData     {object}       Previously submitted form values (for repopulation)
+  ============================================================
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../../partials/head', {
+    seo: { metaTitle: 'Tambah Social Link — Admin' },
+    settings: settings,
+    isAdmin: true
+  }) %>
+</head>
+<body class="antialiased">
+
+  <%- include('../../partials/sidebar', {
+    settings:    settings,
+    unreadCount: unreadCount || 0,
+    activePage:  'social-links'
+  }) %>
+
+  <div class="page-wrapper">
+
+    <%# ── Page Header ──────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <%# Breadcrumb %>
+            <div class="page-pretitle">
+              <a href="/admin/social-links" class="text-secondary">Social Links</a>
+              <span class="mx-1">/</span>
+              Tambah
+            </div>
+            <h2 class="page-title">Tambah Social Link</h2>
+          </div>
+          <div class="col-auto ms-auto d-print-none">
+            <button
+              id="theme-toggle"
+              type="button"
+              aria-label="Toggle dark/light mode"
+              class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+              style="width:2.25rem; height:2.25rem; padding:0;"
+            >
+              <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm d-none" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
+              </svg>
+              <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Body ─────────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row justify-content-center">
+          <div class="col-12 col-lg-8">
+
+            <%- include('../../partials/alerts', {
+              successMessage: null,
+              errorMessage:   errorMessage,
+              infoMessage:    null
+            }) %>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Informasi Social Link</h3>
+              </div>
+              <form action="/admin/social-links" method="POST" novalidate>
+                <div class="card-body">
+
+                  <%# Platform %>
+                  <div class="mb-3">
+                    <label for="platform" class="form-label required">Platform</label>
+                    <input
+                      type="text"
+                      id="platform"
+                      name="platform"
+                      class="form-control"
+                      placeholder="Contoh: GitHub, LinkedIn, Twitter"
+                      value="<%= (formData && formData.platform) ? formData.platform : '' %>"
+                      required
+                      maxlength="100"
+                      aria-describedby="platform-hint"
+                    />
+                    <div id="platform-hint" class="form-hint">Nama platform media sosial.</div>
+                  </div>
+
+                  <%# URL %>
+                  <div class="mb-3">
+                    <label for="url" class="form-label required">URL</label>
+                    <input
+                      type="url"
+                      id="url"
+                      name="url"
+                      class="form-control"
+                      placeholder="https://github.com/username"
+                      value="<%= (formData && formData.url) ? formData.url : '' %>"
+                      required
+                      maxlength="500"
+                      aria-describedby="url-hint"
+                    />
+                    <div id="url-hint" class="form-hint">URL lengkap profil media sosial Anda.</div>
+                  </div>
+
+                  <%# Icon CSS Class %>
+                  <div class="mb-3">
+                    <label for="icon" class="form-label">Icon CSS Class <span class="text-muted">(opsional)</span></label>
+                    <input
+                      type="text"
+                      id="icon"
+                      name="icon"
+                      class="form-control"
+                      placeholder="fab fa-github"
+                      value="<%= (formData && formData.icon) ? formData.icon : '' %>"
+                      maxlength="100"
+                      aria-describedby="icon-hint"
+                    />
+                    <div id="icon-hint" class="form-hint">
+                      CSS class untuk ikon Font Awesome, misalnya <code>fab fa-github</code>, <code>fab fa-linkedin</code>, <code>fab fa-twitter</code>.
+                      Pastikan Font Awesome sudah dimuat di halaman publik.
+                    </div>
+                  </div>
+
+                  <%# Is Active %>
+                  <div class="mb-3">
+                    <label class="form-check form-switch">
+                      <input
+                        type="checkbox"
+                        id="is_active"
+                        name="is_active"
+                        class="form-check-input"
+                        value="on"
+                        <%= (formData && (formData.is_active === 'on' || formData.is_active === true)) ? 'checked' : 'checked' %>
+                        aria-describedby="is-active-hint"
+                      />
+                      <span class="form-check-label">Aktif</span>
+                    </label>
+                    <div id="is-active-hint" class="form-hint">Jika aktif, link ini akan tampil di halaman publik.</div>
+                  </div>
+
+                </div>
+                <div class="card-footer d-flex align-items-center gap-2">
+                  <button type="submit" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm me-1" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                      <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                      <path d="M14 4l0 4l-6 0l0 -4" />
+                    </svg>
+                    Simpan
+                  </button>
+                  <a href="/admin/social-links" class="btn btn-outline-secondary">Batal</a>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </div><%# end container-xl %>
+    </div><%# end page-body %>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-lg-auto ms-lg-auto">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                <a href="/" target="_blank" rel="noopener noreferrer" class="link-secondary">View Site</a>
+              </li>
+              <li class="list-inline-item">
+                <a href="/admin/settings" class="link-secondary">Settings</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+  <script src="/js/admin.js"></script>
+  <script>
+    (function () {
+      var btn  = document.getElementById('theme-toggle');
+      var sun  = document.getElementById('icon-sun');
+      var moon = document.getElementById('icon-moon');
+      function syncIcons() {
+        var isDark = document.documentElement.classList.contains('dark');
+        if (sun)  sun.classList.toggle('d-none', !isDark);
+        if (moon) moon.classList.toggle('d-none', isDark);
+      }
+      syncIcons();
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (typeof toggleTheme === 'function') { toggleTheme(); }
+          else {
+            var isDark = document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark', !isDark);
+            try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
+          }
+          syncIcons();
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>

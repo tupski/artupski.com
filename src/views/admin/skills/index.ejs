@@ -1,0 +1,179 @@
+<%#
+  admin/skills/index.ejs — Skills list page
+  ============================================================
+  Variables expected:
+    - pageTitle      {string}  'Skills'
+    - activePage     {string}  'skills'
+    - settings       {object}  res.locals.settings
+    - unreadCount    {number}  Unread messages count
+    - skills         {Array}   All skill rows sorted by sort_order
+    - successMessage {string|null}
+    - errorMessage   {string|null}
+  ============================================================
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../../partials/head', {
+    seo: { metaTitle: 'Skills — Admin' },
+    settings: settings,
+    isAdmin: true
+  }) %>
+</head>
+<body class="antialiased">
+
+  <%- include('../../partials/sidebar', {
+    settings:    settings,
+    unreadCount: unreadCount || 0,
+    activePage:  'skills'
+  }) %>
+
+  <div class="page-wrapper">
+
+    <%# ── Page Header ──────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <h2 class="page-title">Skills</h2>
+            <div class="text-muted mt-1">Kelola daftar skill dan tingkat kemampuan.</div>
+          </div>
+          <div class="col-auto ms-auto d-print-none">
+            <a href="/admin/skills/create" class="btn btn-primary d-inline-flex align-items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 5l0 14" />
+                <path d="M5 12l14 0" />
+              </svg>
+              Tambah Skill
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Body ─────────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+
+        <%- include('../../partials/alerts', {
+          successMessage: successMessage,
+          errorMessage:   errorMessage,
+          infoMessage:    null
+        }) %>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Daftar Skills (<%= skills ? skills.length : 0 %>)</h3>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table">
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Kategori</th>
+                  <th>Level</th>
+                  <th>Sort Order</th>
+                  <th class="w-1">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (skills && skills.length > 0) { %>
+                  <% skills.forEach(function(skill) { %>
+                    <tr>
+                      <td class="fw-medium"><%= skill.name %></td>
+                      <td>
+                        <% if (skill.category) { %>
+                          <span class="badge bg-blue-lt"><%= skill.category %></span>
+                        <% } else { %>
+                          <span class="text-muted">—</span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="progress flex-grow-1" style="height: 6px; min-width: 80px;" role="progressbar" aria-valuenow="<%= skill.level %>" aria-valuemin="0" aria-valuemax="100" aria-label="<%= skill.name %> level <%= skill.level %>%">
+                            <div class="progress-bar bg-cyan" style="width: <%= skill.level %>%"></div>
+                          </div>
+                          <span class="text-muted small"><%= skill.level %>%</span>
+                        </div>
+                      </td>
+                      <td><%= skill.sort_order || 0 %></td>
+                      <td>
+                        <div class="d-flex gap-1">
+                          <a
+                            href="/admin/skills/<%= skill.id %>/edit"
+                            class="btn btn-sm btn-outline-secondary"
+                            aria-label="Edit skill <%= skill.name %>"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                              <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+                              <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
+                              <path d="M16 5l3 3" />
+                            </svg>
+                            Edit
+                          </a>
+                          <form
+                            action="/admin/skills/<%= skill.id %>?_method=DELETE"
+                            method="POST"
+                            onsubmit="return confirm('Hapus skill \"<%= skill.name.replace(/'/g, '\\\'') %>\"? Tindakan ini tidak dapat dibatalkan.')"
+                          >
+                            <button
+                              type="submit"
+                              class="btn btn-sm btn-outline-danger"
+                              aria-label="Hapus skill <%= skill.name %>"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M4 7l16 0" />
+                                <path d="M10 11l0 6" />
+                                <path d="M14 11l0 6" />
+                                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                              </svg>
+                              Hapus
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                      Belum ada skill. <a href="/admin/skills/create">Tambah skill pertama</a>.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+  <script src="/js/admin.js"></script>
+
+</body>
+</html>

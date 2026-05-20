@@ -1,0 +1,656 @@
+<%#
+  admin/settings/index.ejs — Website Settings
+  ============================================================
+  Variables expected:
+    - pageTitle      {string}  'Settings'
+    - activePage     {string}  'settings'
+    - settings       {object}  All settings key/value pairs from DB
+    - unreadCount    {number}  Unread messages count
+    - successMessage {string|null}
+    - errorMessage   {string|null}
+  ============================================================
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../../partials/head', {
+    seo: { metaTitle: 'Settings — Admin' },
+    settings: settings,
+    isAdmin: true
+  }) %>
+</head>
+<body class="antialiased">
+
+  <%- include('../../partials/sidebar', {
+    settings:    settings,
+    unreadCount: unreadCount || 0,
+    activePage:  'settings'
+  }) %>
+
+  <div class="page-wrapper">
+
+    <%# ── Page Header ──────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Settings</li>
+              </ol>
+            </nav>
+            <h2 class="page-title">Website Settings</h2>
+            <div class="text-muted mt-1">Kelola semua pengaturan website dari sini.</div>
+          </div>
+          <div class="col-auto ms-auto d-print-none">
+            <div class="d-flex align-items-center gap-2">
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-outline-secondary btn-sm d-none d-sm-inline-flex align-items-center gap-1"
+                aria-label="View public website"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+                  <path d="M11 13l9 -9" />
+                  <path d="M15 4h5v5" />
+                </svg>
+                View Site
+              </a>
+              <button
+                id="theme-toggle"
+                type="button"
+                aria-label="Toggle dark/light mode"
+                class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                style="width:2.25rem; height:2.25rem; padding:0;"
+              >
+                <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm d-none" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                  <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
+                </svg>
+                <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Body ─────────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+
+        <%- include('../../partials/alerts', {
+          successMessage: successMessage,
+          errorMessage:   errorMessage,
+          infoMessage:    null
+        }) %>
+
+        <%# ── Tabs ──────────────────────────────────────────────────────────── %>
+        <div class="card">
+          <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="settings-tabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link active"
+                  id="tab-umum"
+                  data-bs-toggle="tab"
+                  data-bs-target="#pane-umum"
+                  type="button"
+                  role="tab"
+                  aria-controls="pane-umum"
+                  aria-selected="true"
+                >Umum</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="tab-hero"
+                  data-bs-toggle="tab"
+                  data-bs-target="#pane-hero"
+                  type="button"
+                  role="tab"
+                  aria-controls="pane-hero"
+                  aria-selected="false"
+                >Hero</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="tab-about"
+                  data-bs-toggle="tab"
+                  data-bs-target="#pane-about"
+                  type="button"
+                  role="tab"
+                  aria-controls="pane-about"
+                  aria-selected="false"
+                >About</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="tab-kontak"
+                  data-bs-toggle="tab"
+                  data-bs-target="#pane-kontak"
+                  type="button"
+                  role="tab"
+                  aria-controls="pane-kontak"
+                  aria-selected="false"
+                >Kontak</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="tab-seo"
+                  data-bs-toggle="tab"
+                  data-bs-target="#pane-seo"
+                  type="button"
+                  role="tab"
+                  aria-controls="pane-seo"
+                  aria-selected="false"
+                >SEO</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="tab-media"
+                  data-bs-toggle="tab"
+                  data-bs-target="#pane-media"
+                  type="button"
+                  role="tab"
+                  aria-controls="pane-media"
+                  aria-selected="false"
+                >Media</button>
+              </li>
+            </ul>
+          </div>
+
+          <%# Single form wraps all tabs — one submit saves everything %>
+          <form
+            action="/admin/settings"
+            method="POST"
+            enctype="multipart/form-data"
+            novalidate
+          >
+            <div class="tab-content">
+
+              <%# ── Tab: Umum ──────────────────────────────────────────────── %>
+              <div
+                class="tab-pane fade show active"
+                id="pane-umum"
+                role="tabpanel"
+                aria-labelledby="tab-umum"
+              >
+                <div class="card-body">
+                  <h3 class="card-title mb-4">Pengaturan Umum</h3>
+
+                  <div class="mb-3">
+                    <label for="site_name" class="form-label">Nama Website <span class="text-danger" aria-hidden="true">*</span></label>
+                    <input
+                      type="text"
+                      id="site_name"
+                      name="site_name"
+                      class="form-control"
+                      value="<%= settings.site_name || '' %>"
+                      placeholder="Contoh: Artupski"
+                      maxlength="100"
+                      required
+                      aria-describedby="site_name_hint"
+                    />
+                    <div id="site_name_hint" class="form-hint">Nama website yang tampil di browser tab dan header.</div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="tagline" class="form-label">Tagline</label>
+                    <input
+                      type="text"
+                      id="tagline"
+                      name="tagline"
+                      class="form-control"
+                      value="<%= settings.tagline || '' %>"
+                      placeholder="Contoh: Web Developer & SEO Specialist"
+                      maxlength="200"
+                      aria-describedby="tagline_hint"
+                    />
+                    <div id="tagline_hint" class="form-hint">Kalimat singkat yang mendeskripsikan Anda.</div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="footer_text" class="form-label">Footer Text</label>
+                    <input
+                      type="text"
+                      id="footer_text"
+                      name="footer_text"
+                      class="form-control"
+                      value="<%= settings.footer_text || '' %>"
+                      placeholder="Contoh: © 2025 Artupski. All rights reserved."
+                      maxlength="300"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <%# ── Tab: Hero ───────────────────────────────────────────────── %>
+              <div
+                class="tab-pane fade"
+                id="pane-hero"
+                role="tabpanel"
+                aria-labelledby="tab-hero"
+              >
+                <div class="card-body">
+                  <h3 class="card-title mb-4">Pengaturan Hero Section</h3>
+
+                  <div class="mb-3">
+                    <label for="hero_title" class="form-label">Hero Title</label>
+                    <input
+                      type="text"
+                      id="hero_title"
+                      name="hero_title"
+                      class="form-control"
+                      value="<%= settings.hero_title || '' %>"
+                      placeholder="Contoh: Hi, I'm Angga Dwy Saputra"
+                      maxlength="150"
+                    />
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="hero_subtitle" class="form-label">Hero Subtitle</label>
+                    <input
+                      type="text"
+                      id="hero_subtitle"
+                      name="hero_subtitle"
+                      class="form-control"
+                      value="<%= settings.hero_subtitle || '' %>"
+                      placeholder="Contoh: Web Developer & SEO Specialist"
+                      maxlength="200"
+                    />
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="hero_description" class="form-label">Hero Description</label>
+                    <textarea
+                      id="hero_description"
+                      name="hero_description"
+                      class="form-control"
+                      rows="4"
+                      placeholder="Deskripsi singkat tentang Anda di hero section..."
+                      maxlength="500"
+                    ><%= settings.hero_description || '' %></textarea>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="hero_image" class="form-label">Hero Image</label>
+                    <% if (settings.hero_image) { %>
+                      <div class="mb-2">
+                        <img
+                          src="<%= settings.hero_image %>"
+                          alt="Current hero image"
+                          class="img-thumbnail"
+                          style="max-height: 160px; object-fit: cover;"
+                          loading="lazy"
+                        />
+                        <div class="form-hint mt-1">Gambar saat ini. Upload baru untuk mengganti.</div>
+                      </div>
+                    <% } %>
+                    <input
+                      type="file"
+                      id="hero_image"
+                      name="hero_image"
+                      class="form-control"
+                      accept="image/jpeg,image/png,image/webp"
+                      aria-describedby="hero_image_hint"
+                    />
+                    <div id="hero_image_hint" class="form-hint">Format: JPEG, PNG, WebP. Maks 5MB. Akan dikompresi otomatis.</div>
+                  </div>
+                </div>
+              </div>
+
+              <%# ── Tab: About ──────────────────────────────────────────────── %>
+              <div
+                class="tab-pane fade"
+                id="pane-about"
+                role="tabpanel"
+                aria-labelledby="tab-about"
+              >
+                <div class="card-body">
+                  <h3 class="card-title mb-4">Konten About</h3>
+
+                  <div class="mb-3">
+                    <label for="about_content_editor" class="form-label">About Content</label>
+                    <%# Hidden textarea that receives Quill HTML output %>
+                    <textarea
+                      id="about_content"
+                      name="about_content"
+                      class="d-none"
+                      aria-hidden="true"
+                    ><%= settings.about_content || '' %></textarea>
+                    <%# Quill editor container %>
+                    <div
+                      id="about_content_editor"
+                      style="min-height: 300px;"
+                      aria-label="About content rich text editor"
+                    ></div>
+                    <div class="form-hint mt-2">Gunakan editor di atas untuk menulis konten halaman About Anda.</div>
+                  </div>
+                </div>
+              </div>
+
+              <%# ── Tab: Kontak ─────────────────────────────────────────────── %>
+              <div
+                class="tab-pane fade"
+                id="pane-kontak"
+                role="tabpanel"
+                aria-labelledby="tab-kontak"
+              >
+                <div class="card-body">
+                  <h3 class="card-title mb-4">Informasi Kontak</h3>
+
+                  <div class="mb-3">
+                    <label for="contact_email" class="form-label">Email Kontak</label>
+                    <input
+                      type="email"
+                      id="contact_email"
+                      name="contact_email"
+                      class="form-control"
+                      value="<%= settings.contact_email || '' %>"
+                      placeholder="Contoh: hello@artupski.com"
+                      maxlength="254"
+                    />
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="whatsapp_number" class="form-label">Nomor WhatsApp</label>
+                    <input
+                      type="text"
+                      id="whatsapp_number"
+                      name="whatsapp_number"
+                      class="form-control"
+                      value="<%= settings.whatsapp_number || '' %>"
+                      placeholder="Contoh: 6281234567890 (format internasional tanpa +)"
+                      maxlength="20"
+                      aria-describedby="whatsapp_hint"
+                    />
+                    <div id="whatsapp_hint" class="form-hint">Gunakan format internasional, contoh: 6281234567890</div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="address" class="form-label">Alamat</label>
+                    <textarea
+                      id="address"
+                      name="address"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Contoh: Jakarta, Indonesia"
+                      maxlength="300"
+                    ><%= settings.address || '' %></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <%# ── Tab: SEO ────────────────────────────────────────────────── %>
+              <div
+                class="tab-pane fade"
+                id="pane-seo"
+                role="tabpanel"
+                aria-labelledby="tab-seo"
+              >
+                <div class="card-body">
+                  <h3 class="card-title mb-4">Pengaturan SEO Default</h3>
+                  <p class="text-muted mb-4">
+                    Nilai ini digunakan sebagai fallback ketika halaman tidak memiliki meta title/description sendiri.
+                  </p>
+
+                  <div class="mb-3">
+                    <label for="seo_title_default" class="form-label">Default SEO Title</label>
+                    <input
+                      type="text"
+                      id="seo_title_default"
+                      name="seo_title_default"
+                      class="form-control"
+                      value="<%= settings.seo_title_default || '' %>"
+                      placeholder="Contoh: Angga Dwy Saputra — Web Developer & SEO Specialist"
+                      maxlength="60"
+                      aria-describedby="seo_title_hint"
+                    />
+                    <div id="seo_title_hint" class="form-hint">Maks 60 karakter. Saat ini: <span id="seo_title_count">0</span> karakter.</div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="seo_description_default" class="form-label">Default SEO Description</label>
+                    <textarea
+                      id="seo_description_default"
+                      name="seo_description_default"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Deskripsi singkat website untuk mesin pencari..."
+                      maxlength="160"
+                      aria-describedby="seo_desc_hint"
+                    ><%= settings.seo_description_default || '' %></textarea>
+                    <div id="seo_desc_hint" class="form-hint">Maks 160 karakter. Saat ini: <span id="seo_desc_count">0</span> karakter.</div>
+                  </div>
+                </div>
+              </div>
+
+              <%# ── Tab: Media ──────────────────────────────────────────────── %>
+              <div
+                class="tab-pane fade"
+                id="pane-media"
+                role="tabpanel"
+                aria-labelledby="tab-media"
+              >
+                <div class="card-body">
+                  <h3 class="card-title mb-4">Logo & Favicon</h3>
+
+                  <%# Logo %>
+                  <div class="mb-4">
+                    <label for="logo" class="form-label">Logo Website</label>
+                    <% if (settings.logo) { %>
+                      <div class="mb-2">
+                        <img
+                          src="<%= settings.logo %>"
+                          alt="Current logo"
+                          class="img-thumbnail"
+                          style="max-height: 80px; object-fit: contain; background: #f8f9fa;"
+                          loading="lazy"
+                        />
+                        <div class="form-hint mt-1">Logo saat ini. Upload baru untuk mengganti.</div>
+                      </div>
+                    <% } else { %>
+                      <div class="mb-2 text-muted small">Belum ada logo. Nama website akan ditampilkan sebagai teks.</div>
+                    <% } %>
+                    <input
+                      type="file"
+                      id="logo"
+                      name="logo"
+                      class="form-control"
+                      accept="image/jpeg,image/png,image/webp"
+                      aria-describedby="logo_hint"
+                    />
+                    <div id="logo_hint" class="form-hint">Format: JPEG, PNG, WebP. Maks 5MB. Rekomendasi: PNG transparan.</div>
+                  </div>
+
+                  <%# Favicon %>
+                  <div class="mb-3">
+                    <label for="favicon" class="form-label">Favicon</label>
+                    <% if (settings.favicon) { %>
+                      <div class="mb-2 d-flex align-items-center gap-2">
+                        <img
+                          src="<%= settings.favicon %>"
+                          alt="Current favicon"
+                          class="img-thumbnail"
+                          style="width: 32px; height: 32px; object-fit: contain;"
+                          loading="lazy"
+                        />
+                        <span class="text-muted small">Favicon saat ini. Upload baru untuk mengganti.</span>
+                      </div>
+                    <% } else { %>
+                      <div class="mb-2 text-muted small">Belum ada favicon.</div>
+                    <% } %>
+                    <input
+                      type="file"
+                      id="favicon"
+                      name="favicon"
+                      class="form-control"
+                      accept="image/jpeg,image/png,image/webp"
+                      aria-describedby="favicon_hint"
+                    />
+                    <div id="favicon_hint" class="form-hint">Format: JPEG, PNG, WebP. Maks 5MB. Rekomendasi: 32×32px atau 64×64px PNG.</div>
+                  </div>
+                </div>
+              </div>
+
+            </div><%# end .tab-content %>
+
+            <%# ── Form Footer / Submit ──────────────────────────────────────── %>
+            <div class="card-footer d-flex align-items-center justify-content-end gap-2">
+              <a href="/admin" class="btn btn-ghost-secondary">Batal</a>
+              <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                  <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                  <path d="M14 4l0 4l-6 0l0 -4" />
+                </svg>
+                Simpan Settings
+              </button>
+            </div>
+
+          </form>
+        </div><%# end .card %>
+
+      </div><%# end .container-xl %>
+    </div><%# end .page-body %>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-lg-auto ms-lg-auto">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                <a href="/" target="_blank" rel="noopener noreferrer" class="link-secondary">View Site</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <%# ── Tabler JS ──────────────────────────────────────────────────────────── %>
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+
+  <%# ── Quill.js CDN ───────────────────────────────────────────────────────── %>
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
+  <%# ── Admin JS ───────────────────────────────────────────────────────────── %>
+  <script src="/js/admin.js"></script>
+
+  <%# ── Theme toggle sync ──────────────────────────────────────────────────── %>
+  <script>
+    (function () {
+      var btn  = document.getElementById('theme-toggle');
+      var sun  = document.getElementById('icon-sun');
+      var moon = document.getElementById('icon-moon');
+
+      function syncIcons() {
+        var isDark = document.documentElement.classList.contains('dark');
+        if (sun)  sun.classList.toggle('d-none', !isDark);
+        if (moon) moon.classList.toggle('d-none', isDark);
+      }
+
+      syncIcons();
+
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (typeof toggleTheme === 'function') {
+            toggleTheme();
+          } else {
+            var isDark = document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark', !isDark);
+            try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
+          }
+          syncIcons();
+        });
+      }
+    })();
+  </script>
+
+  <%# ── Quill editor init ──────────────────────────────────────────────────── %>
+  <script>
+    (function () {
+      var hiddenTextarea = document.getElementById('about_content');
+      var editorEl       = document.getElementById('about_content_editor');
+
+      if (!editorEl || !hiddenTextarea) return;
+
+      var quill = new Quill(editorEl, {
+        theme: 'snow',
+        placeholder: 'Tulis konten about di sini...',
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['blockquote', 'code-block'],
+            ['link'],
+            ['clean']
+          ]
+        }
+      });
+
+      // Pre-populate editor with existing content
+      if (hiddenTextarea.value) {
+        quill.root.innerHTML = hiddenTextarea.value;
+      }
+
+      // Sync Quill HTML back to hidden textarea before form submit
+      var form = editorEl.closest('form');
+      if (form) {
+        form.addEventListener('submit', function () {
+          hiddenTextarea.value = quill.root.innerHTML;
+        });
+      }
+    })();
+  </script>
+
+  <%# ── SEO character counters ─────────────────────────────────────────────── %>
+  <script>
+    (function () {
+      function initCounter(inputId, counterId) {
+        var input   = document.getElementById(inputId);
+        var counter = document.getElementById(counterId);
+        if (!input || !counter) return;
+
+        function update() {
+          counter.textContent = input.value.length;
+        }
+
+        update();
+        input.addEventListener('input', update);
+      }
+
+      initCounter('seo_title_default',       'seo_title_count');
+      initCounter('seo_description_default', 'seo_desc_count');
+    })();
+  </script>
+
+</body>
+</html>

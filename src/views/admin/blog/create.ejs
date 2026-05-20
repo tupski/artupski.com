@@ -1,0 +1,353 @@
+<%#
+  admin/blog/create.ejs — Create new blog post
+  Variables expected:
+    - pageTitle     {string}
+    - activePage    {string}  'blog'
+    - errorMessage  {string|null}
+    - formData      {object|null}  Previously submitted form data (on validation error)
+%>
+<%
+  const fd = formData || {};
+  const content = `
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-10">
+
+    <form
+      method="POST"
+      action="/admin/blog"
+      enctype="multipart/form-data"
+      id="blog-form"
+      novalidate
+    >
+
+      <div class="row g-4">
+
+        <!-- ── Left column: main content ─────────────────────────────── -->
+        <div class="col-12 col-lg-8">
+
+          <!-- Title -->
+          <div class="card mb-4">
+            <div class="card-body">
+              <div class="mb-3">
+                <label for="title" class="form-label required">Judul Post</label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  class="form-control form-control-lg"
+                  placeholder="Masukkan judul blog post..."
+                  value="${fd.title ? fd.title.replace(/"/g, '&quot;') : ''}"
+                  required
+                  autocomplete="off"
+                  aria-describedby="title-help"
+                />
+                <div id="title-help" class="form-text">Judul akan digunakan untuk generate slug secara otomatis.</div>
+              </div>
+
+              <!-- Slug -->
+              <div class="mb-0">
+                <label for="slug" class="form-label">Slug URL</label>
+                <div class="input-group">
+                  <span class="input-group-text text-muted">/blog/</span>
+                  <input
+                    type="text"
+                    id="slug"
+                    name="slug"
+                    class="form-control"
+                    placeholder="auto-generated-dari-judul"
+                    value="${fd.slug ? fd.slug.replace(/"/g, '&quot;') : ''}"
+                    autocomplete="off"
+                    aria-describedby="slug-help"
+                  />
+                </div>
+                <div id="slug-help" class="form-text">Kosongkan untuk generate otomatis dari judul. Hanya huruf kecil, angka, dan tanda hubung.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Excerpt -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h4 class="card-title mb-0">Ringkasan</h4>
+            </div>
+            <div class="card-body">
+              <label for="excerpt" class="form-label">Excerpt / Ringkasan</label>
+              <textarea
+                id="excerpt"
+                name="excerpt"
+                class="form-control"
+                rows="3"
+                placeholder="Ringkasan singkat blog post (opsional)..."
+                aria-describedby="excerpt-help"
+              >${fd.excerpt ? fd.excerpt.replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''}</textarea>
+              <div id="excerpt-help" class="form-text">Ditampilkan di halaman daftar blog. Maks. 300 karakter.</div>
+            </div>
+          </div>
+
+          <!-- Content (Quill) -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h4 class="card-title mb-0">Konten</h4>
+            </div>
+            <div class="card-body">
+              <label for="content-editor" class="form-label">Isi Artikel</label>
+
+              <!-- Quill toolbar + editor -->
+              <div id="quill-toolbar">
+                <span class="ql-formats">
+                  <select class="ql-header">
+                    <option value="1">Heading 1</option>
+                    <option value="2">Heading 2</option>
+                    <option value="3">Heading 3</option>
+                    <option selected>Normal</option>
+                  </select>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-bold" aria-label="Bold"></button>
+                  <button class="ql-italic" aria-label="Italic"></button>
+                  <button class="ql-underline" aria-label="Underline"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-blockquote" aria-label="Blockquote"></button>
+                  <button class="ql-code-block" aria-label="Code block"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-list" value="ordered" aria-label="Ordered list"></button>
+                  <button class="ql-list" value="bullet" aria-label="Bullet list"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-link" aria-label="Insert link"></button>
+                  <button class="ql-image" aria-label="Insert image"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-clean" aria-label="Remove formatting"></button>
+                </span>
+              </div>
+              <div
+                id="content-editor"
+                style="min-height: 320px;"
+                aria-label="Konten artikel"
+              ></div>
+
+              <!-- Hidden textarea to hold Quill HTML output -->
+              <textarea
+                id="content"
+                name="content"
+                class="d-none"
+                aria-hidden="true"
+              >${fd.content ? fd.content.replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''}</textarea>
+            </div>
+          </div>
+
+          <!-- SEO -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h4 class="card-title mb-0">SEO</h4>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label for="meta_title" class="form-label">Meta Title</label>
+                <input
+                  type="text"
+                  id="meta_title"
+                  name="meta_title"
+                  class="form-control"
+                  placeholder="Judul untuk mesin pencari (maks. 60 karakter)"
+                  value="${fd.meta_title ? fd.meta_title.replace(/"/g, '&quot;') : ''}"
+                  maxlength="60"
+                  aria-describedby="meta-title-help"
+                />
+                <div id="meta-title-help" class="form-text">Kosongkan untuk menggunakan judul post.</div>
+              </div>
+              <div class="mb-0">
+                <label for="meta_description" class="form-label">Meta Description</label>
+                <textarea
+                  id="meta_description"
+                  name="meta_description"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Deskripsi untuk mesin pencari (maks. 160 karakter)"
+                  maxlength="160"
+                  aria-describedby="meta-desc-help"
+                >${fd.meta_description ? fd.meta_description.replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''}</textarea>
+                <div id="meta-desc-help" class="form-text">Kosongkan untuk menggunakan excerpt.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Right column: sidebar options ─────────────────────────── -->
+        <div class="col-12 col-lg-4">
+
+          <!-- Publish settings -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h4 class="card-title mb-0">Publikasi</h4>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select id="status" name="status" class="form-select" aria-describedby="status-help">
+                  <option value="draft" ${(!fd.status || fd.status === 'draft') ? 'selected' : ''}>Draft</option>
+                  <option value="published" ${fd.status === 'published' ? 'selected' : ''}>Published</option>
+                </select>
+                <div id="status-help" class="form-text">Draft tidak tampil di halaman publik.</div>
+              </div>
+              <div class="mb-0">
+                <label for="published_at" class="form-label">Tanggal Publish</label>
+                <input
+                  type="datetime-local"
+                  id="published_at"
+                  name="published_at"
+                  class="form-control"
+                  value="${fd.published_at ? fd.published_at.replace(/"/g, '&quot;') : ''}"
+                  aria-describedby="published-at-help"
+                />
+                <div id="published-at-help" class="form-text">Kosongkan untuk menggunakan waktu saat ini saat dipublish.</div>
+              </div>
+            </div>
+            <div class="card-footer d-flex gap-2">
+              <button type="submit" class="btn btn-primary flex-fill">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon me-1" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                  <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                  <path d="M14 4l0 4l-6 0l0 -4" />
+                </svg>
+                Simpan
+              </button>
+              <a href="/admin/blog" class="btn btn-outline-secondary">Batal</a>
+            </div>
+          </div>
+
+          <!-- Featured Image -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h4 class="card-title mb-0">Featured Image</h4>
+            </div>
+            <div class="card-body">
+              <div id="image-preview-wrap" class="mb-3 d-none">
+                <img
+                  id="image-preview"
+                  src=""
+                  alt="Preview featured image"
+                  class="img-fluid rounded"
+                  style="max-height:200px; object-fit:cover; width:100%;"
+                  loading="lazy"
+                />
+              </div>
+              <label for="featured_image" class="form-label">Upload Gambar</label>
+              <input
+                type="file"
+                id="featured_image"
+                name="featured_image"
+                class="form-control"
+                accept="image/jpeg,image/png,image/webp"
+                aria-describedby="image-help"
+              />
+              <div id="image-help" class="form-text">JPEG, PNG, atau WebP. Maks. 5MB. Gambar akan dioptimasi otomatis.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- Quill.js CDN -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
+<script>
+(function () {
+  // ── Quill editor init ──────────────────────────────────────────────────
+  var quill = new Quill('#content-editor', {
+    theme: 'snow',
+    modules: {
+      toolbar: '#quill-toolbar'
+    },
+    placeholder: 'Tulis konten artikel di sini...'
+  });
+
+  // Pre-fill content if formData exists (validation error redirect)
+  var hiddenContent = document.getElementById('content');
+  if (hiddenContent && hiddenContent.value.trim()) {
+    // Decode HTML entities back to raw HTML for Quill
+    var tmp = document.createElement('div');
+    tmp.innerHTML = hiddenContent.value;
+    quill.root.innerHTML = tmp.textContent || tmp.innerText || '';
+  }
+
+  // Sync Quill HTML to hidden textarea before form submit
+  var form = document.getElementById('blog-form');
+  if (form) {
+    form.addEventListener('submit', function () {
+      hiddenContent.value = quill.root.innerHTML;
+    });
+  }
+
+  // ── Auto-generate slug from title ─────────────────────────────────────
+  var titleInput = document.getElementById('title');
+  var slugInput  = document.getElementById('slug');
+  var slugManuallyEdited = false;
+
+  if (slugInput) {
+    slugInput.addEventListener('input', function () {
+      slugManuallyEdited = slugInput.value.trim() !== '';
+    });
+  }
+
+  if (titleInput && slugInput) {
+    titleInput.addEventListener('input', function () {
+      if (!slugManuallyEdited) {
+        slugInput.value = titleInput.value
+          .toLowerCase()
+          .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
+          .replace(/[\\s&+/\\\\|@#$%^*()[\\]{}<>?!=~\`;:'",.]+/g, '-')
+          .replace(/[^a-z0-9-]/g, '')
+          .replace(/-{2,}/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .substring(0, 100)
+          .replace(/-+$/, '');
+      }
+    });
+  }
+
+  // ── Featured image preview ─────────────────────────────────────────────
+  var fileInput   = document.getElementById('featured_image');
+  var previewWrap = document.getElementById('image-preview-wrap');
+  var previewImg  = document.getElementById('image-preview');
+
+  if (fileInput && previewWrap && previewImg) {
+    fileInput.addEventListener('change', function () {
+      var file = fileInput.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          previewImg.src = e.target.result;
+          previewWrap.classList.remove('d-none');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewWrap.classList.add('d-none');
+        previewImg.src = '';
+      }
+    });
+  }
+})();
+</script>
+`;
+%>
+<%- include('../../layouts/admin', {
+  pageTitle,
+  activePage,
+  breadcrumbs,
+  settings,
+  unreadCount,
+  content,
+  successMessage: null,
+  errorMessage
+}) %>

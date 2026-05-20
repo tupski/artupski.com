@@ -1,0 +1,196 @@
+<%#
+  admin/skills/create.ejs — Create new skill form
+  ============================================================
+  Variables expected:
+    - pageTitle    {string}      'Tambah Skill'
+    - activePage   {string}      'skills'
+    - settings     {object}      res.locals.settings
+    - unreadCount  {number}      Unread messages count
+    - errorMessage {string|null} Validation error message
+    - formData     {object}      Previously submitted form values (for re-population)
+  ============================================================
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../../partials/head', {
+    seo: { metaTitle: 'Tambah Skill — Admin' },
+    settings: settings,
+    isAdmin: true
+  }) %>
+</head>
+<body class="antialiased">
+
+  <%- include('../../partials/sidebar', {
+    settings:    settings,
+    unreadCount: unreadCount || 0,
+    activePage:  'skills'
+  }) %>
+
+  <div class="page-wrapper">
+
+    <%# ── Page Header ──────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <%# Breadcrumb %>
+            <div class="page-pretitle">
+              <a href="/admin/skills" class="text-secondary">Skills</a>
+            </div>
+            <h2 class="page-title">Tambah Skill</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Body ─────────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row justify-content-center">
+          <div class="col-12 col-lg-8">
+
+            <%- include('../../partials/alerts', {
+              successMessage: null,
+              errorMessage:   errorMessage,
+              infoMessage:    null
+            }) %>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Form Tambah Skill</h3>
+              </div>
+              <div class="card-body">
+                <form action="/admin/skills" method="POST" novalidate>
+
+                  <%# Name %>
+                  <div class="mb-3">
+                    <label for="name" class="form-label required">Nama Skill</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      class="form-control"
+                      placeholder="Contoh: JavaScript, Node.js, SEO"
+                      value="<%= (formData && formData.name) ? formData.name : '' %>"
+                      required
+                      maxlength="100"
+                      aria-required="true"
+                    />
+                    <div class="form-hint">Nama skill yang akan ditampilkan di halaman About.</div>
+                  </div>
+
+                  <%# Level %>
+                  <div class="mb-3">
+                    <label for="level" class="form-label required">Level (0–100)</label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        id="level"
+                        name="level"
+                        class="form-control"
+                        placeholder="85"
+                        value="<%= (formData && formData.level !== undefined) ? formData.level : '' %>"
+                        min="0"
+                        max="100"
+                        required
+                        aria-required="true"
+                        aria-describedby="level-hint"
+                      />
+                      <span class="input-group-text">%</span>
+                    </div>
+                    <div id="level-hint" class="form-hint">Tingkat kemampuan dalam persen (0 = pemula, 100 = ahli).</div>
+                  </div>
+
+                  <%# Category %>
+                  <div class="mb-3">
+                    <label for="category" class="form-label">Kategori</label>
+                    <input
+                      type="text"
+                      id="category"
+                      name="category"
+                      class="form-control"
+                      placeholder="Contoh: Frontend, Backend, Tools"
+                      value="<%= (formData && formData.category) ? formData.category : '' %>"
+                      maxlength="100"
+                    />
+                    <div class="form-hint">Opsional. Digunakan untuk mengelompokkan skill.</div>
+                  </div>
+
+                  <%# Sort Order %>
+                  <div class="mb-3">
+                    <label for="sort_order" class="form-label">Urutan Tampil</label>
+                    <input
+                      type="number"
+                      id="sort_order"
+                      name="sort_order"
+                      class="form-control"
+                      placeholder="0"
+                      value="<%= (formData && formData.sort_order !== undefined) ? formData.sort_order : '0' %>"
+                      min="0"
+                      aria-describedby="sort-hint"
+                    />
+                    <div id="sort-hint" class="form-hint">Angka lebih kecil tampil lebih dulu. Default: 0.</div>
+                  </div>
+
+                  <%# Actions %>
+                  <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm me-1" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                        <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                        <path d="M14 4l0 4l-6 0l0 -4" />
+                      </svg>
+                      Simpan Skill
+                    </button>
+                    <a href="/admin/skills" class="btn btn-outline-secondary">Batal</a>
+                  </div>
+
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+  <script src="/js/admin.js"></script>
+
+  <%# Live preview of level progress bar %>
+  <script>
+    (function () {
+      var levelInput = document.getElementById('level');
+      if (!levelInput) return;
+
+      levelInput.addEventListener('input', function () {
+        var val = parseInt(this.value, 10);
+        if (!isNaN(val) && val >= 0 && val <= 100) {
+          this.style.setProperty('--progress', val + '%');
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>

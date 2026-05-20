@@ -1,0 +1,288 @@
+<%#
+  admin/messages/detail.ejs — Admin: Detail Pesan
+  ============================================================
+  Variables expected:
+    - pageTitle   {string}  e.g. 'Pesan dari Budi'
+    - activePage  {string}  'messages'
+    - settings    {object}  res.locals.settings
+    - unreadCount {number}  Unread contact messages count
+    - message     {object}  Contact message row
+  ============================================================
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../../partials/head', {
+    seo: { metaTitle: pageTitle + ' — Admin' },
+    settings: settings,
+    isAdmin: true
+  }) %>
+</head>
+<body class="antialiased">
+
+  <%- include('../../partials/sidebar', {
+    settings:    settings,
+    unreadCount: unreadCount || 0,
+    activePage:  'messages'
+  }) %>
+
+  <div class="page-wrapper">
+
+    <%# ── Page Header ──────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col-auto">
+            <a href="/admin/messages" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1" aria-label="Kembali ke daftar pesan">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M5 12l14 0" />
+                <path d="M5 12l6 6" />
+                <path d="M5 12l6 -6" />
+              </svg>
+              Kembali
+            </a>
+          </div>
+          <div class="col">
+            <h2 class="page-title">Detail Pesan</h2>
+            <div class="text-muted mt-1">
+              Diterima pada
+              <% if (message.created_at) { %>
+                <%= new Date(message.created_at).toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) %>
+                pukul
+                <%= new Date(message.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %>
+              <% } else { %>
+                —
+              <% } %>
+            </div>
+          </div>
+          <div class="col-auto ms-auto d-print-none">
+            <div class="d-flex align-items-center gap-2">
+              <button
+                id="theme-toggle"
+                type="button"
+                aria-label="Toggle dark/light mode"
+                class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                style="width:2.25rem; height:2.25rem; padding:0;"
+              >
+                <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm d-none" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                  <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
+                </svg>
+                <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Body ─────────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row justify-content-center">
+          <div class="col-12 col-lg-8">
+
+            <div class="card">
+              <div class="card-header">
+                <div class="d-flex align-items-center gap-3 w-100">
+                  <span class="avatar avatar-md text-uppercase bg-blue-lt" aria-hidden="true">
+                    <%= message.name ? message.name.charAt(0) : '?' %>
+                  </span>
+                  <div class="flex-fill">
+                    <div class="fw-bold fs-4"><%= message.name %></div>
+                    <div class="text-muted small">
+                      <a href="mailto:<%= message.email %>" class="text-muted text-decoration-none">
+                        <%= message.email %>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="ms-auto">
+                    <% if (message.status === 'unread') { %>
+                      <span class="badge bg-danger">Belum Dibaca</span>
+                    <% } else { %>
+                      <span class="badge bg-secondary">Sudah Dibaca</span>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-body">
+
+                <%# Subject %>
+                <div class="mb-4">
+                  <label class="form-label text-muted small text-uppercase fw-bold" style="letter-spacing:0.05em;">
+                    Subjek
+                  </label>
+                  <div class="fs-5 fw-medium">
+                    <%= message.subject || '(tanpa subjek)' %>
+                  </div>
+                </div>
+
+                <%# Message body %>
+                <div class="mb-4">
+                  <label class="form-label text-muted small text-uppercase fw-bold" style="letter-spacing:0.05em;">
+                    Pesan
+                  </label>
+                  <div class="p-3 bg-light rounded" style="white-space: pre-wrap; line-height: 1.7; word-break: break-word;">
+                    <%= message.message %>
+                  </div>
+                </div>
+
+                <%# Meta info %>
+                <div class="row g-3">
+                  <div class="col-sm-6">
+                    <label class="form-label text-muted small text-uppercase fw-bold" style="letter-spacing:0.05em;">
+                      Tanggal Diterima
+                    </label>
+                    <div class="text-body">
+                      <% if (message.created_at) { %>
+                        <%= new Date(message.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) %>
+                        &mdash;
+                        <%= new Date(message.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %>
+                      <% } else { %>
+                        —
+                      <% } %>
+                    </div>
+                  </div>
+                  <% if (message.ip_address) { %>
+                    <div class="col-sm-6">
+                      <label class="form-label text-muted small text-uppercase fw-bold" style="letter-spacing:0.05em;">
+                        IP Address
+                      </label>
+                      <div class="text-muted small font-monospace"><%= message.ip_address %></div>
+                    </div>
+                  <% } %>
+                </div>
+
+              </div>
+
+              <div class="card-footer d-flex align-items-center justify-content-between gap-2">
+                <a
+                  href="/admin/messages"
+                  class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M5 12l14 0" />
+                    <path d="M5 12l6 6" />
+                    <path d="M5 12l6 -6" />
+                  </svg>
+                  Kembali ke Daftar
+                </a>
+
+                <div class="d-flex gap-2">
+                  <a
+                    href="mailto:<%= message.email %>?subject=Re: <%= encodeURIComponent(message.subject || '') %>"
+                    class="btn btn-primary d-inline-flex align-items-center gap-1"
+                    aria-label="Balas email ke <%= message.name %>"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" />
+                      <path d="M3 7l9 6l9 -6" />
+                    </svg>
+                    Balas via Email
+                  </a>
+
+                  <form
+                    action="/admin/messages/<%= message.id %>?_method=DELETE"
+                    method="POST"
+                    class="d-inline"
+                    onsubmit="return confirm('Hapus pesan dari <%= message.name.replace(/'/g, "\\'") %>? Tindakan ini tidak dapat dibatalkan.')"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-danger d-inline-flex align-items-center gap-1"
+                      aria-label="Hapus pesan dari <%= message.name %>"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M4 7l16 0" />
+                        <path d="M10 11l0 6" />
+                        <path d="M14 11l0 6" />
+                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                      </svg>
+                      Hapus Pesan
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div><%# end container-xl %>
+    </div><%# end page-body %>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-lg-auto ms-lg-auto">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                <a href="/" target="_blank" rel="noopener noreferrer" class="link-secondary">View Site</a>
+              </li>
+              <li class="list-inline-item">
+                <a href="/admin/settings" class="link-secondary">Settings</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <%# ── Tabler JS ──────────────────────────────────────────────────────────── %>
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+
+  <%# ── Admin JS ───────────────────────────────────────────────────────────── %>
+  <script src="/js/admin.js"></script>
+
+  <%# ── Theme toggle sync ──────────────────────────────────────────────────── %>
+  <script>
+    (function () {
+      var btn  = document.getElementById('theme-toggle');
+      var sun  = document.getElementById('icon-sun');
+      var moon = document.getElementById('icon-moon');
+
+      function syncIcons() {
+        var isDark = document.documentElement.classList.contains('dark');
+        if (sun)  sun.classList.toggle('d-none', !isDark);
+        if (moon) moon.classList.toggle('d-none', isDark);
+      }
+
+      syncIcons();
+
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (typeof toggleTheme === 'function') {
+            toggleTheme();
+          } else {
+            var isDark = document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark', !isDark);
+            try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
+          }
+          syncIcons();
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>

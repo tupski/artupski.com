@@ -1,0 +1,266 @@
+<%#
+  admin/experience/edit.ejs — Edit existing work experience
+  Variables expected:
+    - pageTitle    {string}  'Edit Experience'
+    - activePage   {string}  'experience'
+    - settings     {object}  res.locals.settings
+    - unreadCount  {number}  Unread messages count
+    - experience   {object}  Current experience row from DB
+    - errorMessage {string|null}
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../../partials/head', {
+    seo: { metaTitle: 'Edit Experience — Admin' },
+    settings: settings,
+    isAdmin: true
+  }) %>
+</head>
+<body class="antialiased">
+
+  <%- include('../../partials/sidebar', {
+    settings:    settings,
+    unreadCount: unreadCount || 0,
+    activePage:  'experience'
+  }) %>
+
+  <div class="page-wrapper">
+
+    <%# ── Page Header ──────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <%# Breadcrumb %>
+            <ol class="breadcrumb" aria-label="breadcrumbs">
+              <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="/admin/experience">Experience</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Edit</li>
+            </ol>
+            <h2 class="page-title">Edit Experience</h2>
+            <div class="text-muted mt-1"><%= experience.company_name %> — <%= experience.position %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Body ─────────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+
+        <%- include('../../partials/alerts', {
+          successMessage: null,
+          errorMessage:   errorMessage,
+          infoMessage:    null
+        }) %>
+
+        <div class="row justify-content-center">
+          <div class="col-12 col-lg-8">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Informasi Experience</h3>
+              </div>
+              <div class="card-body">
+
+                <%#
+                  Use POST with _method=PUT override.
+                  method-override middleware reads ?_method=PUT from query string.
+                %>
+                <form action="/admin/experience/<%= experience.id %>?_method=PUT" method="POST" novalidate>
+
+                  <%# Company Name %>
+                  <div class="mb-3">
+                    <label for="company_name" class="form-label required">
+                      Nama Perusahaan
+                    </label>
+                    <input
+                      type="text"
+                      id="company_name"
+                      name="company_name"
+                      class="form-control"
+                      value="<%= experience.company_name %>"
+                      required
+                      maxlength="255"
+                      aria-required="true"
+                    />
+                  </div>
+
+                  <%# Position %>
+                  <div class="mb-3">
+                    <label for="position" class="form-label required">
+                      Posisi / Jabatan
+                    </label>
+                    <input
+                      type="text"
+                      id="position"
+                      name="position"
+                      class="form-control"
+                      value="<%= experience.position %>"
+                      required
+                      maxlength="255"
+                      aria-required="true"
+                    />
+                  </div>
+
+                  <%# Description %>
+                  <div class="mb-3">
+                    <label for="description" class="form-label">
+                      Deskripsi
+                      <span class="text-muted small">(opsional)</span>
+                    </label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      class="form-control"
+                      rows="4"
+                      placeholder="Deskripsikan tanggung jawab dan pencapaian Anda..."
+                    ><%= experience.description || '' %></textarea>
+                  </div>
+
+                  <%# Date row %>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="start_date" class="form-label required">
+                        Tanggal Mulai
+                      </label>
+                      <input
+                        type="date"
+                        id="start_date"
+                        name="start_date"
+                        class="form-control"
+                        value="<%= experience.start_date ? experience.start_date.toString().slice(0, 10) : '' %>"
+                        required
+                        aria-required="true"
+                      />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="end_date" class="form-label">
+                        Tanggal Selesai
+                        <span class="text-muted small">(kosongkan jika masih aktif)</span>
+                      </label>
+                      <input
+                        type="date"
+                        id="end_date"
+                        name="end_date"
+                        class="form-control"
+                        value="<%= experience.end_date ? experience.end_date.toString().slice(0, 10) : '' %>"
+                        <%= experience.is_current ? 'disabled' : '' %>
+                        aria-describedby="end_date_hint"
+                      />
+                      <div id="end_date_hint" class="form-hint">
+                        Tidak perlu diisi jika <em>Masih Bekerja di Sini</em> dicentang.
+                      </div>
+                    </div>
+                  </div>
+
+                  <%# Is Current %>
+                  <div class="mb-4">
+                    <label class="form-check" for="is_current">
+                      <input
+                        type="checkbox"
+                        id="is_current"
+                        name="is_current"
+                        class="form-check-input"
+                        value="on"
+                        <%= experience.is_current ? 'checked' : '' %>
+                        onchange="toggleEndDate(this)"
+                      />
+                      <span class="form-check-label">Masih Bekerja di Sini</span>
+                    </label>
+                  </div>
+
+                  <%# Actions %>
+                  <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                      Simpan Perubahan
+                    </button>
+                    <a href="/admin/experience" class="btn btn-outline-secondary">
+                      Batal
+                    </a>
+                  </div>
+
+                </form>
+
+              </div>
+            </div>
+
+            <%# ── Danger Zone ──────────────────────────────────────────────── %>
+            <div class="card border-danger mt-3">
+              <div class="card-header border-danger">
+                <h3 class="card-title text-danger">Danger Zone</h3>
+              </div>
+              <div class="card-body">
+                <p class="text-muted mb-3">
+                  Hapus experience ini secara permanen. Tindakan ini tidak dapat dibatalkan.
+                </p>
+                <form
+                  action="/admin/experience/<%= experience.id %>?_method=DELETE"
+                  method="POST"
+                  onsubmit="return confirm('Hapus experience di <%= experience.company_name %>? Tindakan ini tidak dapat dibatalkan.')"
+                >
+                  <button type="submit" class="btn btn-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm me-1" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M4 7l16 0" />
+                      <path d="M10 11l0 6" />
+                      <path d="M14 11l0 6" />
+                      <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                      <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                    </svg>
+                    Hapus Experience
+                  </button>
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+  <script src="/js/admin.js"></script>
+  <script>
+    /**
+     * Toggle end_date field disabled state based on is_current checkbox.
+     */
+    function toggleEndDate(checkbox) {
+      var endDateInput = document.getElementById('end_date');
+      if (!endDateInput) return;
+      if (checkbox.checked) {
+        endDateInput.disabled = true;
+        endDateInput.value    = '';
+      } else {
+        endDateInput.disabled = false;
+      }
+    }
+
+    // Apply on page load
+    (function () {
+      var checkbox = document.getElementById('is_current');
+      if (checkbox) toggleEndDate(checkbox);
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,201 @@
+<%#
+  layouts/admin.ejs — Admin panel layout (Tabler)
+  ============================================================
+  Variables expected:
+    - pageTitle    {string}  Page title shown in <title> and page header
+    - settings     {object}  res.locals.settings
+    - activePage   {string}  Active sidebar item key
+    - unreadCount  {number}  Unread messages count for badge
+    - content      {string}  Page-specific HTML (<%- content %>)
+    - breadcrumbs  {Array}   Optional: [{ label, href }] for breadcrumb trail
+
+  Usage in admin page views:
+    <%- include('../../layouts/admin', { pageTitle: 'Dashboard', activePage: 'dashboard', content: pageContent, ...locals }) %>
+  ============================================================
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../partials/head', {
+    seo: { metaTitle: (typeof pageTitle !== 'undefined' ? pageTitle + ' — Admin' : 'Admin') },
+    settings: settings,
+    isAdmin: true
+  }) %>
+  <%# Prevent Tabler's own theme from conflicting with our dark mode toggle %>
+  <style>
+    /* Ensure sidebar brand text is readable */
+    .navbar-brand .text-cyan-400 { color: #22d3ee !important; }
+  </style>
+</head>
+<body class="antialiased">
+
+  <%# ── Tabler Sidebar ─────────────────────────────────────────────────────── %>
+  <%- include('../partials/sidebar', {
+    settings: settings,
+    unreadCount: typeof unreadCount !== 'undefined' ? unreadCount : 0,
+    activePage: typeof activePage !== 'undefined' ? activePage : ''
+  }) %>
+
+  <%# ── Page Wrapper ───────────────────────────────────────────────────────── %>
+  <div class="page-wrapper">
+
+    <%# ── Topbar ──────────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+
+          <%# Page title + breadcrumb %>
+          <div class="col">
+            <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs && breadcrumbs.length > 0) { %>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb" aria-label="breadcrumbs">
+                  <li class="breadcrumb-item">
+                    <a href="/admin">Admin</a>
+                  </li>
+                  <% breadcrumbs.forEach(function(crumb, i) { %>
+                    <% if (i === breadcrumbs.length - 1) { %>
+                      <li class="breadcrumb-item active" aria-current="page"><%= crumb.label %></li>
+                    <% } else { %>
+                      <li class="breadcrumb-item"><a href="<%= crumb.href %>"><%= crumb.label %></a></li>
+                    <% } %>
+                  <% }); %>
+                </ol>
+              </nav>
+            <% } %>
+            <h2 class="page-title">
+              <%= typeof pageTitle !== 'undefined' ? pageTitle : 'Admin Panel' %>
+            </h2>
+          </div>
+
+          <%# Topbar right: theme toggle + view site link %>
+          <div class="col-auto ms-auto d-print-none">
+            <div class="d-flex align-items-center gap-2">
+
+              <%# View public site %>
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-outline-secondary btn-sm d-none d-sm-inline-flex align-items-center gap-1"
+                aria-label="View public website"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+                  <path d="M11 13l9 -9" />
+                  <path d="M15 4h5v5" />
+                </svg>
+                View Site
+              </a>
+
+              <%# Theme toggle %>
+              <button
+                id="theme-toggle"
+                type="button"
+                aria-label="Toggle dark/light mode"
+                class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                style="width:2.25rem; height:2.25rem; padding:0;"
+              >
+                <%# Sun icon — shown in dark mode %>
+                <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm d-none" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                  <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
+                </svg>
+                <%# Moon icon — shown in light mode %>
+                <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+                </svg>
+              </button>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Content ────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+
+        <%# Flash Alerts %>
+        <%- include('../partials/alerts', {
+          successMessage: typeof successMessage !== 'undefined' ? successMessage : null,
+          errorMessage:   typeof errorMessage   !== 'undefined' ? errorMessage   : null,
+          infoMessage:    typeof infoMessage    !== 'undefined' ? infoMessage    : null
+        }) %>
+
+        <%# Page-specific content %>
+        <%- content %>
+
+      </div>
+    </div>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-lg-auto ms-lg-auto">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                <a href="/" target="_blank" rel="noopener noreferrer" class="link-secondary">View Site</a>
+              </li>
+              <li class="list-inline-item">
+                <a href="/admin/settings" class="link-secondary">Settings</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <%# ── Tabler JS (CDN) ────────────────────────────────────────────────────── %>
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+
+  <%# ── Admin JS ───────────────────────────────────────────────────────────── %>
+  <script src="/js/admin.js"></script>
+
+  <%# ── Admin theme toggle sync ────────────────────────────────────────────── %>
+  <script>
+    (function () {
+      var btn = document.getElementById('theme-toggle');
+      var sun = document.getElementById('icon-sun');
+      var moon = document.getElementById('icon-moon');
+
+      function syncIcons() {
+        var isDark = document.documentElement.classList.contains('dark');
+        if (sun)  sun.classList.toggle('d-none', !isDark);
+        if (moon) moon.classList.toggle('d-none', isDark);
+      }
+
+      syncIcons();
+
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (typeof toggleTheme === 'function') {
+            toggleTheme();
+          } else {
+            var isDark = document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark', !isDark);
+            try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
+          }
+          syncIcons();
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>
