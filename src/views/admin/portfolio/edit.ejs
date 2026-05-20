@@ -1,0 +1,490 @@
+<%#
+  admin/portfolio/edit.ejs — Edit Portfolio
+  ============================================================
+  Variables expected:
+    - pageTitle    {string}  'Edit Portfolio'
+    - activePage   {string}  'portfolio'
+    - settings     {object}  res.locals.settings
+    - unreadCount  {number}  Unread contact messages count
+    - portfolio    {object}  Current portfolio row from DB
+    - errorMessage {string|null}
+  ============================================================
+%>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../../partials/head', {
+    seo: { metaTitle: 'Edit Portfolio — Admin' },
+    settings: settings,
+    isAdmin: true
+  }) %>
+  <%# Quill.js CSS %>
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+</head>
+<body class="antialiased">
+
+  <%- include('../../partials/sidebar', {
+    settings:    settings,
+    unreadCount: unreadCount || 0,
+    activePage:  'portfolio'
+  }) %>
+
+  <div class="page-wrapper">
+
+    <%# ── Page Header ──────────────────────────────────────────────────────── %>
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <div class="page-pretitle">
+              <a href="/admin/portfolio" class="text-muted">Portfolio</a>
+            </div>
+            <h2 class="page-title">Edit Portfolio</h2>
+          </div>
+          <div class="col-auto ms-auto">
+            <button
+              id="theme-toggle"
+              type="button"
+              aria-label="Toggle dark/light mode"
+              class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+              style="width:2.25rem; height:2.25rem; padding:0;"
+            >
+              <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm d-none" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
+              </svg>
+              <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Page Body ─────────────────────────────────────────────────────────── %>
+    <div class="page-body">
+      <div class="container-xl">
+
+        <%- include('../../partials/alerts', {
+          successMessage: null,
+          errorMessage:   errorMessage,
+          infoMessage:    null
+        }) %>
+
+        <form
+          action="/admin/portfolio/<%= portfolio.id %>?_method=PUT"
+          method="POST"
+          enctype="multipart/form-data"
+          novalidate
+        >
+
+          <div class="row">
+
+            <%# ── Main Column ──────────────────────────────────────────────── %>
+            <div class="col-lg-8">
+
+              <%# Basic Info %>
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h3 class="card-title">Informasi Dasar</h3>
+                </div>
+                <div class="card-body">
+
+                  <div class="mb-3">
+                    <label for="title" class="form-label required">Judul</label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      class="form-control"
+                      value="<%= portfolio.title || '' %>"
+                      placeholder="Nama proyek portfolio"
+                      required
+                      maxlength="255"
+                    />
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="slug" class="form-label">Slug</label>
+                    <div class="input-group">
+                      <span class="input-group-text text-muted">/portfolio/</span>
+                      <input
+                        type="text"
+                        id="slug"
+                        name="slug"
+                        class="form-control"
+                        value="<%= portfolio.slug || '' %>"
+                        placeholder="auto-generated dari judul"
+                        maxlength="100"
+                      />
+                    </div>
+                    <div class="form-hint">Kosongkan untuk generate otomatis dari judul.</div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="short_description" class="form-label">Deskripsi Singkat</label>
+                    <textarea
+                      id="short_description"
+                      name="short_description"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Ringkasan singkat proyek (tampil di listing)"
+                      maxlength="500"
+                    ><%= portfolio.short_description || '' %></textarea>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="full_description_editor" class="form-label">Deskripsi Lengkap</label>
+                    <%# Hidden input that receives Quill HTML output %>
+                    <input type="hidden" id="full_description" name="full_description" value="<%= portfolio.full_description || '' %>" />
+                    <%# Quill editor container %>
+                    <div
+                      id="full_description_editor"
+                      style="min-height: 200px;"
+                      aria-label="Editor deskripsi lengkap"
+                    ></div>
+                    <div class="form-hint">Gunakan editor di atas untuk deskripsi lengkap proyek.</div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="tech_stack" class="form-label">Tech Stack</label>
+                    <input
+                      type="text"
+                      id="tech_stack"
+                      name="tech_stack"
+                      class="form-control"
+                      value="<%= portfolio.tech_stack || '' %>"
+                      placeholder="Contoh: Node.js, Express, PostgreSQL"
+                      maxlength="500"
+                    />
+                    <div class="form-hint">Pisahkan dengan koma.</div>
+                  </div>
+
+                </div>
+              </div>
+
+              <%# Links %>
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h3 class="card-title">Tautan</h3>
+                </div>
+                <div class="card-body">
+
+                  <div class="mb-3">
+                    <label for="demo_link" class="form-label">Demo Link</label>
+                    <input
+                      type="url"
+                      id="demo_link"
+                      name="demo_link"
+                      class="form-control"
+                      value="<%= portfolio.demo_link || '' %>"
+                      placeholder="https://example.com"
+                    />
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="github_link" class="form-label">GitHub Link</label>
+                    <input
+                      type="url"
+                      id="github_link"
+                      name="github_link"
+                      class="form-control"
+                      value="<%= portfolio.github_link || '' %>"
+                      placeholder="https://github.com/username/repo"
+                    />
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+
+            <%# ── Sidebar Column ───────────────────────────────────────────── %>
+            <div class="col-lg-4">
+
+              <%# Publish Settings %>
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h3 class="card-title">Publikasi</h3>
+                </div>
+                <div class="card-body">
+
+                  <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="status" class="form-select">
+                      <option value="draft" <%= (!portfolio.status || portfolio.status === 'draft') ? 'selected' : '' %>>Draft</option>
+                      <option value="published" <%= portfolio.status === 'published' ? 'selected' : '' %>>Published</option>
+                    </select>
+                  </div>
+
+                  <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm me-1" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                        <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                        <path d="M14 4l0 4l-6 0l0 -4" />
+                      </svg>
+                      Simpan Perubahan
+                    </button>
+                    <a href="/admin/portfolio" class="btn btn-outline-secondary">Batal</a>
+                  </div>
+
+                </div>
+              </div>
+
+              <%# Category & Client %>
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h3 class="card-title">Detail Proyek</h3>
+                </div>
+                <div class="card-body">
+
+                  <div class="mb-3">
+                    <label for="category" class="form-label">Kategori</label>
+                    <input
+                      type="text"
+                      id="category"
+                      name="category"
+                      class="form-control"
+                      value="<%= portfolio.category || '' %>"
+                      placeholder="Contoh: Web App, Mobile, UI/UX"
+                      maxlength="100"
+                    />
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="client_name" class="form-label">Nama Klien</label>
+                    <input
+                      type="text"
+                      id="client_name"
+                      name="client_name"
+                      class="form-control"
+                      value="<%= portfolio.client_name || '' %>"
+                      placeholder="Opsional"
+                      maxlength="255"
+                    />
+                  </div>
+
+                </div>
+              </div>
+
+              <%# Image Upload %>
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h3 class="card-title">Gambar</h3>
+                </div>
+                <div class="card-body">
+
+                  <% if (portfolio.image) { %>
+                  <div class="mb-3">
+                    <p class="form-label text-muted small mb-1">Gambar saat ini:</p>
+                    <img
+                      src="<%= portfolio.image %>"
+                      alt="Gambar portfolio saat ini"
+                      class="img-fluid rounded"
+                      style="max-height: 160px; object-fit: cover; width: 100%;"
+                      loading="lazy"
+                    />
+                  </div>
+                  <% } %>
+
+                  <div class="mb-2">
+                    <label for="image" class="form-label">Ganti Gambar</label>
+                    <input
+                      type="file"
+                      id="image"
+                      name="image"
+                      class="form-control"
+                      accept="image/jpeg,image/png,image/webp"
+                    />
+                    <div class="form-hint">JPEG, PNG, atau WebP. Maks 5MB. Kosongkan untuk mempertahankan gambar saat ini.</div>
+                  </div>
+
+                  <%# Image preview for new upload %>
+                  <div id="image-preview-wrapper" class="mt-2 d-none">
+                    <img
+                      id="image-preview"
+                      src=""
+                      alt="Preview gambar baru"
+                      class="img-fluid rounded"
+                      style="max-height: 180px; object-fit: cover; width: 100%;"
+                    />
+                  </div>
+
+                </div>
+              </div>
+
+              <%# Danger Zone %>
+              <div class="card border-danger">
+                <div class="card-header border-danger">
+                  <h3 class="card-title text-danger">Danger Zone</h3>
+                </div>
+                <div class="card-body">
+                  <p class="text-muted small mb-3">Hapus portfolio ini secara permanen. Tindakan ini tidak dapat dibatalkan.</p>
+                  <form
+                    action="/admin/portfolio/<%= portfolio.id %>?_method=DELETE"
+                    method="POST"
+                    onsubmit="return confirm('Hapus portfolio ini? Tindakan ini tidak dapat dibatalkan.')"
+                  >
+                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm me-1" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M4 7l16 0" />
+                        <path d="M10 11l0 6" />
+                        <path d="M14 11l0 6" />
+                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                      </svg>
+                      Hapus Portfolio Ini
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+            </div>
+          </div><%# end row %>
+
+        </form>
+
+      </div>
+    </div>
+
+    <%# ── Footer ─────────────────────────────────────────────────────────── %>
+    <footer class="footer footer-transparent d-print-none">
+      <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+          <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <ul class="list-inline list-inline-dots mb-0">
+              <li class="list-inline-item">
+                &copy; <%= new Date().getFullYear() %>
+                <a href="/" class="link-secondary"><%= (settings && settings.site_name) ? settings.site_name : 'Artupski' %></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><%# end .page-wrapper %>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+  <%# Quill.js %>
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+  <script src="/js/admin.js"></script>
+
+  <script>
+    // ── Quill editor setup ──────────────────────────────────────────────────
+    (function () {
+      var quill = new Quill('#full_description_editor', {
+        theme: 'snow',
+        placeholder: 'Tulis deskripsi lengkap proyek di sini...',
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['blockquote', 'code-block'],
+            ['link'],
+            ['clean']
+          ]
+        }
+      });
+
+      // Pre-fill editor with existing content
+      var existing = document.getElementById('full_description').value;
+      if (existing) {
+        quill.root.innerHTML = existing;
+      }
+
+      // Sync Quill HTML to hidden input before form submit
+      var form = document.querySelector('form[action*="/admin/portfolio/"]');
+      if (form) {
+        form.addEventListener('submit', function () {
+          document.getElementById('full_description').value = quill.root.innerHTML;
+        });
+      }
+    })();
+
+    // ── Auto-generate slug from title (only if slug is empty) ───────────────
+    (function () {
+      var titleInput = document.getElementById('title');
+      var slugInput  = document.getElementById('slug');
+      var userEditedSlug = slugInput && slugInput.value.trim() !== '';
+
+      if (slugInput) {
+        slugInput.addEventListener('input', function () {
+          userEditedSlug = slugInput.value.trim() !== '';
+        });
+      }
+
+      if (titleInput && slugInput) {
+        titleInput.addEventListener('input', function () {
+          if (!userEditedSlug) {
+            slugInput.value = titleInput.value
+              .toLowerCase()
+              .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+              .replace(/[\s&+/\\|@#$%^*()\[\]{}<>?!=~`;:'",.]+/g, '-')
+              .replace(/[^a-z0-9-]/g, '')
+              .replace(/-{2,}/g, '-')
+              .replace(/^-+|-+$/g, '')
+              .substring(0, 100);
+          }
+        });
+      }
+    })();
+
+    // ── Image preview ───────────────────────────────────────────────────────
+    (function () {
+      var input   = document.getElementById('image');
+      var wrapper = document.getElementById('image-preview-wrapper');
+      var preview = document.getElementById('image-preview');
+
+      if (input && wrapper && preview) {
+        input.addEventListener('change', function () {
+          var file = input.files[0];
+          if (file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+              preview.src = e.target.result;
+              wrapper.classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+          } else {
+            wrapper.classList.add('d-none');
+            preview.src = '';
+          }
+        });
+      }
+    })();
+
+    // ── Theme toggle sync ───────────────────────────────────────────────────
+    (function () {
+      var btn  = document.getElementById('theme-toggle');
+      var sun  = document.getElementById('icon-sun');
+      var moon = document.getElementById('icon-moon');
+      function syncIcons() {
+        var isDark = document.documentElement.classList.contains('dark');
+        if (sun)  sun.classList.toggle('d-none', !isDark);
+        if (moon) moon.classList.toggle('d-none', isDark);
+      }
+      syncIcons();
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (typeof toggleTheme === 'function') { toggleTheme(); }
+          else {
+            var isDark = document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark', !isDark);
+            try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
+          }
+          syncIcons();
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>
