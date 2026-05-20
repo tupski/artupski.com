@@ -149,6 +149,7 @@ Buka **Vercel Dashboard → Project → Settings → Environment Variables** dan
 | `DATABASE_URL` | Production, Preview |
 | `SUPABASE_URL` | Production, Preview |
 | `SUPABASE_ANON_KEY` | Production, Preview |
+| `SUPABASE_STORAGE_BUCKET` | Production, Preview |
 | `ADMIN_EMAIL` | Production |
 | `ADMIN_PASSWORD` | Production |
 | `NODE_ENV` | Production → `production` |
@@ -344,4 +345,6 @@ artupski.com/
 
 ## Lisensi
 
-Hak cipta © 2025 Angga Dwy Saputra. Semua hak dilindungi.
+Proyek ini dilisensikan di bawah [MIT License](LICENSE).
+
+Copyright (c) 2026 Angga Dwy Saputra

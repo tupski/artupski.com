@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "npm run build:css",
   "builds": [
     {
       "src": "src/app.js",
@@ -7,6 +8,22 @@
     }
   ],
   "routes": [
+    {
+      "src": "/css/(.*)",
+      "dest": "/src/public/css/$1"
+    },
+    {
+      "src": "/js/(.*)",
+      "dest": "/src/public/js/$1"
+    },
+    {
+      "src": "/images/(.*)",
+      "dest": "/src/public/images/$1"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "/src/public/uploads/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "src/app.js"
