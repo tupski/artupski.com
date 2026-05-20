@@ -46,8 +46,9 @@ desktop.ini
 dist/
 build/
 
-# TailwindCSS compiled output (generated, tidak perlu di-commit)
-src/public/css/output.css
+# TailwindCSS compiled output — di-commit agar tersedia di Vercel
+# Jalankan `npm run build:css` sebelum commit jika ada perubahan CSS
+# src/public/css/output.css
 
 # PM2
 .pm2/
