@@ -28,10 +28,11 @@ function isValidEmail(email) {
 // ---------------------------------------------------------------------------
 async function index(req, res, next) {
   try {
-    const [portfolios, services, blogPosts] = await Promise.all([
+    const [portfolios, services, blogPosts, socialLinks] = await Promise.all([
       Portfolio.findAll({ status: 'published', limit: 3 }),
       Service.findAll({ status: 'active' }),
       BlogPost.findAll({ status: 'published', limit: 3 }),
+      SocialLink.findAll({ isActive: true }),
     ]);
 
     const seo = buildSeoMeta({ settings: res.locals.settings });
@@ -42,6 +43,7 @@ async function index(req, res, next) {
       portfolios,
       services,
       blogPosts,
+      socialLinks,
       currentPath: req.path,
     });
   } catch (err) {
